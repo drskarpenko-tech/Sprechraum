@@ -1,0 +1,1256 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sprechraum</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+/* Layout: one-column learning app, bottom tab bar, large type for a reader over 50. Palette from a warehouse floor: slate concrete, signal orange, safety green. */
+:root {
+  --bg: #f3f1ec; --surface: #ffffff; --surface-2: #e9e6df; --fg: #1c1f24; --muted: #5c6370; --line: #d6d2c8;
+  --accent: #d9541b; --accent-fg: #ffffff; --accent-soft: #fbe6da;
+  --ok: #2e7d4f; --ok-soft: #dff1e5; --warn: #b7791f; --warn-soft: #fbefd6; --bad: #b3261e; --bad-soft: #f9dedc;
+  --me: #e3ecf7; --other: #ffffff;
+  --display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", Roboto, system-ui, sans-serif;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15171b; --surface: #1f2228; --surface-2: #2a2e36; --fg: #eceae4; --muted: #a0a6b1; --line: #363b45;
+  --accent: #f0702f; --accent-fg: #1a1208; --accent-soft: #3a2518;
+  --ok: #6fcf97; --ok-soft: #1e3a2a; --warn: #e4b05a; --warn-soft: #3a2f16; --bad: #f28b82; --bad-soft: #42201e;
+  --me: #22314a; --other: #1f2228; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #15171b; --surface: #1f2228; --surface-2: #2a2e36; --fg: #eceae4; --muted: #a0a6b1; --line: #363b45;
+  --accent: #f0702f; --accent-fg: #1a1208; --accent-soft: #3a2518;
+  --ok: #6fcf97; --ok-soft: #1e3a2a; --warn: #e4b05a; --warn-soft: #3a2f16; --bad: #f28b82; --bad-soft: #42201e;
+  --me: #22314a; --other: #1f2228; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 18px; line-height: 1.5; }
+#app { max-width: 720px; margin: 0 auto; padding-inline: 16px; padding-block: 12px 110px; min-width: 0; }
+h1 { font-family: var(--display); font-size: 2.3rem; line-height: 1.05; margin: 8px 0 6px; text-wrap: balance; letter-spacing: .01em; }
+h2.cat { font-family: var(--display); font-size: 1.35rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 26px 0 10px; }
+h3 { font-family: var(--display); font-size: 1.4rem; margin: 0 0 8px; letter-spacing: .01em; }
+p { margin: 0 0 10px; }
+.lead { color: var(--muted); font-size: 1.05rem; max-width: 60ch; }
+.eyebrow { font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+.hint { color: var(--muted); font-size: .95rem; }
+.hint.warn { background: var(--warn-soft); color: var(--fg); border-left: 4px solid var(--warn); padding: 10px 12px; border-radius: 8px; }
+.roles { font-size: .9rem; color: var(--muted); }
+.hero { padding: 10px 0 6px; }
+.hero h1 { font-size: 3rem; }
+
+/* buttons */
+.btn { font: inherit; font-weight: 700; font-size: 1rem; padding: 12px 18px; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; min-height: 48px; }
+.btn:hover { border-color: var(--fg); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn.mic { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.btn.mic.rec { background: var(--bad); border-color: var(--bad); color: #fff; animation: pulse 1s infinite; }
+.btn.danger { color: var(--bad); border-color: var(--bad); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.g0 { border-color: var(--bad); color: var(--bad); } .btn.g1 { border-color: var(--warn); color: var(--warn); } .btn.g2 { border-color: var(--ok); color: var(--ok); }
+.link { font: inherit; background: none; border: 0; color: var(--accent); font-weight: 700; cursor: pointer; padding: 8px 0; }
+.link.small { font-size: .85rem; }
+.icon-btn { font: inherit; font-size: 1.2rem; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex: none; color: var(--fg); }
+.icon-btn.big { width: 64px; height: 64px; font-size: 1.6rem; }
+.icon-btn.speaking, .btn.speaking { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 var(--bad-soft); } 50% { box-shadow: 0 0 0 8px var(--bad-soft); } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; scroll-behavior: auto !important; transition: none !important; } }
+
+.ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.chip { font: inherit; font-size: .95rem; padding: 8px 14px; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; min-height: 40px; }
+.chip.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.rate { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rate-l { font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-right: 4px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* stats + plan */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 14px 0; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; min-width: 0; }
+.stat .num { font-family: var(--display); font-size: 2.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat .of { font-size: 1rem; color: var(--muted); font-family: var(--body); }
+.stat .lbl { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+.plan { display: grid; gap: 10px; margin: 16px 0; }
+.step { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.step.done { opacity: .75; }
+.step-n { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font-family: var(--display); font-size: 1.5rem; }
+.step.done .step-n { background: var(--ok); color: #fff; }
+.step-t { font-weight: 700; font-size: 1.1rem; } .step-s { color: var(--muted); font-size: .95rem; }
+.step-body { min-width: 0; }
+@media (max-width: 460px) { .step { grid-template-columns: 44px 1fr; } .step .btn { grid-column: 2; justify-self: start; } }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin: 14px 0; min-width: 0; }
+.card.tip ul { margin: 0; padding-left: 20px; } .card.tip li { margin-bottom: 6px; }
+.card.warn { border-color: var(--warn); background: var(--warn-soft); }
+.card.grammar { border-left: 5px solid var(--accent); }
+
+/* lists */
+.list { display: grid; gap: 8px; }
+.row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; color: var(--fg); cursor: pointer; min-width: 0; }
+.row:not(.static):hover { border-color: var(--accent); }
+.row.static { cursor: default; }
+.row-emoji { font-size: 1.6rem; flex: none; width: 36px; text-align: center; }
+.row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.row-t { font-weight: 700; font-size: 1.05rem; } .row-s { color: var(--muted); font-size: .9rem; }
+.badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.badge { font-size: .8rem; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); white-space: nowrap; }
+.badge.ok { background: var(--ok-soft); color: var(--ok); font-weight: 700; }
+
+/* dialog */
+.dialog { display: grid; gap: 10px; margin: 12px 0; }
+.line { display: grid; grid-template-columns: 34px 1fr 46px; gap: 8px; align-items: start; }
+.who { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-family: var(--display); font-size: 1.1rem; background: var(--surface-2); color: var(--muted); margin-top: 4px; }
+.line.me .who { background: var(--accent); color: var(--accent-fg); }
+.bubble { background: var(--other); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 14px; min-width: 0; }
+.line.me .bubble { background: var(--me); }
+.line.speaking .bubble { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.de { font-size: 1.15rem; font-weight: 700; }
+.ru { color: var(--muted); font-size: .98rem; margin-top: 2px; }
+.xl { font-size: 1.5rem; line-height: 1.3; }
+.ru.xl { color: var(--fg); font-weight: 400; }
+.masked { display: none; color: var(--muted); font-style: italic; }
+.line.hidden-text:not(.reveal) .de, .line.hidden-text:not(.reveal) .ru { display: none; }
+.line.hidden-text:not(.reveal) .masked { display: block; }
+.line.hidden-text { cursor: pointer; }
+
+/* quiz */
+.q { margin: 12px 0; } .q-t { font-weight: 700; }
+.opts { display: grid; gap: 8px; }
+.opt { font: inherit; text-align: left; padding: 12px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.opt.right { border-color: var(--ok); background: var(--ok-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.big { font-family: var(--display); font-size: 1.9rem; margin: 6px 0; }
+.big.good { color: var(--ok); } .big.mid { color: var(--warn); } .big.bad { color: var(--bad); }
+.cmp .de { font-size: 1.25rem; }
+.w-ok { color: var(--ok); } .w-miss { color: var(--bad); text-decoration: underline wavy; }
+
+.input { font: inherit; font-size: 1.1rem; width: 100%; padding: 12px 14px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); min-width: 0; }
+.input.big-inp { font-size: 2rem; font-family: var(--display); text-align: center; letter-spacing: .05em; }
+.check { display: flex; gap: 10px; align-items: center; }
+select.input { appearance: auto; }
+.prog { font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 10px; }
+.speak-card { text-align: center; }
+.speak-card .ctl, .speak-card .selfrate, .speak-card .grades { justify-content: center; }
+.selfrate { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+.grades { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.grades .btn { flex: 1; min-width: 110px; }
+.mic-status { min-height: 1.4em; }
+
+/* talk */
+.topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.topic { font: inherit; text-align: left; display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; color: var(--fg); cursor: pointer; min-width: 0; }
+.topic:hover, .topic.on { border-color: var(--accent); }
+.chat { display: grid; gap: 10px; margin: 12px 0; }
+.msg { max-width: 88%; padding: 10px 14px; border-radius: var(--radius); border: 1px solid var(--line); min-width: 0; }
+.msg.bot { background: var(--other); justify-self: start; border-bottom-left-radius: 4px; }
+.msg.user { background: var(--me); justify-self: end; border-bottom-right-radius: 4px; }
+.msg .icon-btn { width: 36px; height: 36px; font-size: 1rem; margin-top: 6px; margin-right: 8px; }
+.fix { background: var(--warn-soft); border-left: 4px solid var(--warn); border-radius: 8px; padding: 8px 12px; font-size: .95rem; }
+.fix-l { color: var(--muted); }
+.fix .icon-btn { width: 32px; height: 32px; font-size: .9rem; margin-left: 6px; }
+.talk-ctl { position: sticky; bottom: 82px; background: var(--bg); padding: 8px 0; }
+.talk-ctl .input { flex: 1; min-width: 160px; }
+
+/* progress */
+.days { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; height: 90px; align-items: end; }
+.day { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+.day-bar { width: 100%; background: var(--line); min-height: 3px; }
+.day.on .day-bar { background: var(--accent); } .day.hot .day-bar { background: var(--ok); }
+.day-d { font-size: .7rem; color: var(--muted); position: absolute; top: 3px; font-variant-numeric: tabular-nums; }
+
+/* nav */
+.nav { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--line); display: flex; justify-content: space-around; padding: 6px 4px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); z-index: 5; }
+.nav button { font: inherit; font-size: .72rem; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: 0; color: var(--muted); padding: 6px 4px; border-radius: 10px; min-width: 56px; cursor: pointer; }
+.nav button span { font-size: 1.4rem; }
+.nav button.active { color: var(--accent); background: var(--accent-soft); }
+</style>
+
+<main id="app"></main>
+<nav class="nav" aria-label="Разделы">
+  <button data-v="home"><span>🏠</span>Сегодня</button>
+  <button data-v="hoeren"><span>🎧</span>Слушать</button>
+  <button data-v="sprechen"><span>🗣</span>Говорить</button>
+  <button data-v="phrasen"><span>🗂</span>Фразы</button>
+  <button data-v="talk"><span>💬</span>Разговор</button>
+  <button data-v="fortschritt"><span>📈</span>Прогресс</button>
+  <button data-v="settings"><span>⚙️</span></button>
+</nav>
+<script>
+// ===== Учебный контент: уровень A1–A2, бытовые и рабочие ситуации (склад / логистика / производство)
+const BASIS = {
+  id: 'basis', title: 'Фразы-спасатели', cat: 'basis',
+  intro: 'Эти 12 фраз нужны раньше всего. С ними любой разговор можно удержать, даже если ничего не понял.',
+  phrases: [
+    { de: 'Entschuldigung, ich habe Sie nicht verstanden.', ru: 'Извините, я вас не понял.' },
+    { de: 'Könnten Sie das bitte wiederholen?', ru: 'Не могли бы вы повторить?' },
+    { de: 'Könnten Sie bitte langsamer sprechen?', ru: 'Не могли бы вы говорить помедленнее?' },
+    { de: 'Was bedeutet das?', ru: 'Что это означает?' },
+    { de: 'Wie sagt man das auf Deutsch?', ru: 'Как это сказать по-немецки?' },
+    { de: 'Einen Moment, bitte.', ru: 'Минутку, пожалуйста.' },
+    { de: 'Mein Deutsch ist noch nicht so gut.', ru: 'Мой немецкий пока не очень хороший.' },
+    { de: 'Können Sie mir das bitte aufschreiben?', ru: 'Можете мне это записать?' },
+    { de: 'Ich habe eine Frage.', ru: 'У меня вопрос.' },
+    { de: 'Alles klar, danke.', ru: 'Всё понятно, спасибо.' },
+    { de: 'Ist das richtig so?', ru: 'Так правильно?' },
+    { de: 'Kein Problem.', ru: 'Без проблем.' },
+  ],
+};
+
+const SCENARIOS = [
+  {
+    id: 'schicht', title: 'Начало смены', cat: 'arbeit', emoji: '🏭',
+    situation: 'Утро. Руководитель смены (Schichtleiter) распределяет людей по участкам.',
+    roles: { A: 'Руководитель смены', B: 'Ты' },
+    lines: [
+      { s: 'A', de: 'Morgen! Heute bist du im Wareneingang.', ru: 'Доброе утро! Сегодня ты на приёмке товара.' },
+      { s: 'B', de: 'Guten Morgen. Alles klar. Mit wem arbeite ich zusammen?', ru: 'Доброе утро. Понятно. С кем я работаю?' },
+      { s: 'A', de: 'Mit Thomas. Er zeigt dir den Scanner.', ru: 'С Томасом. Он покажет тебе сканер.' },
+      { s: 'B', de: 'Gut. Wann ist die Pause?', ru: 'Хорошо. Когда перерыв?' },
+      { s: 'A', de: 'Um halb zehn, fünfzehn Minuten. Und um zwölf eine halbe Stunde.', ru: 'В половине десятого, пятнадцать минут. И в двенадцать — полчаса.' },
+      { s: 'B', de: 'Verstanden. Brauche ich heute die Sicherheitsschuhe?', ru: 'Понял. Сегодня нужны защитные ботинки?' },
+      { s: 'A', de: 'Immer! Ohne Sicherheitsschuhe darfst du nicht in die Halle.', ru: 'Всегда! Без защитных ботинок в цех нельзя.' },
+      { s: 'B', de: 'Okay, ich ziehe sie gleich an.', ru: 'Хорошо, сейчас надену.' },
+    ],
+    quiz: [
+      { q: 'Где сегодня работает герой?', opts: ['На приёмке товара', 'На отгрузке', 'На комплектации'], a: 0 },
+      { q: 'Во сколько короткий перерыв?', opts: ['В 10:00', 'В 9:30', 'В 12:00'], a: 1 },
+      { q: 'Без чего нельзя в цех?', opts: ['Без каски', 'Без перчаток', 'Без защитных ботинок'], a: 2 },
+    ],
+    phrases: [
+      { de: 'Mit wem arbeite ich heute?', ru: 'С кем я сегодня работаю?' },
+      { de: 'Wann ist die Pause?', ru: 'Когда перерыв?' },
+      { de: 'Wo finde ich den Scanner?', ru: 'Где мне найти сканер?' },
+      { de: 'Ich bin heute im Wareneingang.', ru: 'Я сегодня на приёмке товара.' },
+      { de: 'Ich ziehe die Sicherheitsschuhe an.', ru: 'Я надеваю защитные ботинки.' },
+      { de: 'Wer ist heute der Schichtleiter?', ru: 'Кто сегодня руководитель смены?' },
+      { de: 'Ich fange um sechs an.', ru: 'Я начинаю в шесть.' },
+      { de: 'Halb zehn.', ru: 'Половина десятого (9:30).' },
+    ],
+    grammar: { t: 'Время по-немецки', ru: '«halb zehn» = половина ДЕСЯТОГО = 9:30, а не 10:30. «Viertel nach neun» = 9:15, «Viertel vor zehn» = 9:45. На работе чаще говорят цифрами: «neun Uhr dreißig».' },
+  },
+  {
+    id: 'lieferung', title: 'Приём поставки', cat: 'arbeit', emoji: '🚚',
+    situation: 'К воротам подъехал грузовик. Водитель привёз паллеты, нужно проверить и подписать накладную.',
+    roles: { A: 'Водитель', B: 'Ты' },
+    lines: [
+      { s: 'A', de: 'Hallo, ich habe eine Lieferung für Sie. Zwölf Paletten.', ru: 'Здравствуйте, у меня для вас поставка. Двенадцать паллет.' },
+      { s: 'B', de: 'Guten Tag. Haben Sie den Lieferschein?', ru: 'Добрый день. У вас есть накладная?' },
+      { s: 'A', de: 'Ja, hier bitte. Wo soll ich abladen?', ru: 'Да, вот. Где разгружать?' },
+      { s: 'B', de: 'An Tor drei, bitte. Ich hole den Hubwagen.', ru: 'У ворот три, пожалуйста. Я принесу рохлю.' },
+      { s: 'A', de: 'Alles klar. Können Sie hier unterschreiben?', ru: 'Хорошо. Можете здесь расписаться?' },
+      { s: 'B', de: 'Moment, ich zähle erst die Paletten. … Es sind nur elf.', ru: 'Минутку, сначала посчитаю паллеты. … Только одиннадцать.' },
+      { s: 'A', de: 'Elf? Lassen Sie mich nachsehen. … Stimmt, eine fehlt.', ru: 'Одиннадцать? Дайте посмотрю. … Верно, одной не хватает.' },
+      { s: 'B', de: 'Dann schreibe ich das auf den Lieferschein.', ru: 'Тогда я запишу это в накладную.' },
+    ],
+    quiz: [
+      { q: 'Сколько паллет заявил водитель?', opts: ['Одиннадцать', 'Двенадцать', 'Тринадцать'], a: 1 },
+      { q: 'Куда нужно разгружать?', opts: ['К воротам 2', 'К воротам 3', 'На склад'], a: 1 },
+      { q: 'Что сделал герой перед тем, как подписать?', opts: ['Позвонил начальнику', 'Пересчитал паллеты', 'Сфотографировал груз'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Haben Sie den Lieferschein?', ru: 'У вас есть накладная?' },
+      { de: 'Wo soll ich abladen?', ru: 'Где мне разгружать?' },
+      { de: 'Fahren Sie bitte an Tor drei.', ru: 'Подъезжайте, пожалуйста, к воротам три.' },
+      { de: 'Ich zähle erst nach.', ru: 'Я сначала пересчитаю.' },
+      { de: 'Eine Palette fehlt.', ru: 'Одной паллеты не хватает.' },
+      { de: 'Die Ware ist beschädigt.', ru: 'Товар повреждён.' },
+      { de: 'Ich schreibe das auf.', ru: 'Я это запишу.' },
+      { de: 'Können Sie hier unterschreiben?', ru: 'Можете здесь расписаться?' },
+    ],
+    grammar: { t: 'Глагол на втором месте', ru: 'В обычном предложении глагол всегда второй: «Dann SCHREIBE ich das auf.» — хотя начинается с «dann». Приставка (auf-) уходит в конец.' },
+  },
+  {
+    id: 'problem', title: 'Сообщить о проблеме', cat: 'arbeit', emoji: '⚠️',
+    situation: 'Сломался сканер, а на стеллаже сломанная паллета. Нужно сказать начальнику.',
+    roles: { A: 'Начальник', B: 'Ты' },
+    lines: [
+      { s: 'B', de: 'Hast du kurz Zeit? Ich habe ein Problem.', ru: 'Есть минутка? У меня проблема.' },
+      { s: 'A', de: 'Klar, was ist los?', ru: 'Конечно, что случилось?' },
+      { s: 'B', de: 'Der Scanner funktioniert nicht. Er zeigt einen Fehler.', ru: 'Сканер не работает. Он показывает ошибку.' },
+      { s: 'A', de: 'Hast du ihn schon neu gestartet?', ru: 'Ты его уже перезапускал?' },
+      { s: 'B', de: 'Ja, zweimal. Es hilft nicht.', ru: 'Да, дважды. Не помогает.' },
+      { s: 'A', de: 'Okay, nimm den Scanner von Platz vier. Ich melde das der IT.', ru: 'Ладно, возьми сканер с места четыре. Я сообщу в IT.' },
+      { s: 'B', de: 'Danke. Und noch etwas: Im Regal B zwölf ist eine Palette kaputt.', ru: 'Спасибо. И ещё: на стеллаже B12 сломана паллета.' },
+      { s: 'A', de: 'Gut, dass du das sagst. Sperr den Bereich ab, ich komme gleich.', ru: 'Хорошо, что сказал. Огради участок, я сейчас подойду.' },
+    ],
+    quiz: [
+      { q: 'Что не работает?', opts: ['Сканер', 'Принтер', 'Погрузчик'], a: 0 },
+      { q: 'Что предложил начальник?', opts: ['Подождать IT', 'Взять другой сканер', 'Пойти домой'], a: 1 },
+      { q: 'Что нужно сделать со сломанной паллетой?', opts: ['Выбросить', 'Оградить участок', 'Переставить'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Hast du kurz Zeit?', ru: 'Есть минутка?' },
+      { de: 'Ich habe ein Problem.', ru: 'У меня проблема.' },
+      { de: 'Das funktioniert nicht.', ru: 'Это не работает.' },
+      { de: 'Es zeigt einen Fehler.', ru: 'Показывает ошибку.' },
+      { de: 'Ich habe es schon neu gestartet.', ru: 'Я уже перезапустил.' },
+      { de: 'Die Palette ist kaputt.', ru: 'Паллета сломана.' },
+      { de: 'Das ist gefährlich.', ru: 'Это опасно.' },
+      { de: 'Ich melde das sofort.', ru: 'Я сейчас же сообщу.' },
+    ],
+    grammar: { t: 'Perfekt — прошедшее в разговоре', ru: '«Ich habe es neu gestartet» = haben + Partizip II в конце. В разговоре о прошлом почти всегда Perfekt, не Präteritum. Запоминай готовые пары: machen → gemacht, sagen → gesagt, starten → gestartet.' },
+  },
+  {
+    id: 'krank', title: 'Позвонить: заболел', cat: 'arbeit', emoji: '📞',
+    situation: 'Утро, температура. Нужно позвонить на работу и сообщить, что не придёшь.',
+    roles: { A: 'Офис / начальник', B: 'Ты' },
+    lines: [
+      { s: 'A', de: 'Logistik Müller, Schneider am Apparat.', ru: 'Логистика Мюллер, Шнайдер у телефона.' },
+      { s: 'B', de: 'Guten Morgen, hier ist Alexander aus der Frühschicht. Ich bin krank und kann heute nicht kommen.', ru: 'Доброе утро, это Александр из утренней смены. Я болен и сегодня не могу прийти.' },
+      { s: 'A', de: 'Oh, gute Besserung. Was haben Sie denn?', ru: 'О, выздоравливайте. Что у вас?' },
+      { s: 'B', de: 'Ich habe Fieber. Ich gehe heute zum Arzt.', ru: 'У меня температура. Сегодня пойду к врачу.' },
+      { s: 'A', de: 'In Ordnung. Schicken Sie uns bitte die Krankmeldung.', ru: 'Хорошо. Пришлите нам, пожалуйста, больничный.' },
+      { s: 'B', de: 'Ja, mache ich. Bis wann brauchen Sie sie?', ru: 'Да, сделаю. До какого срока она вам нужна?' },
+      { s: 'A', de: 'Spätestens am dritten Tag. Melden Sie sich, wenn Sie wieder da sind.', ru: 'Самое позднее на третий день. Дайте знать, когда вернётесь.' },
+      { s: 'B', de: 'Alles klar. Vielen Dank, auf Wiederhören.', ru: 'Хорошо. Большое спасибо, до свидания.' },
+    ],
+    quiz: [
+      { q: 'Что у героя?', opts: ['Болит спина', 'Температура', 'Кашель'], a: 1 },
+      { q: 'Что просит офис прислать?', opts: ['Больничный', 'Заявление на отпуск', 'Фото'], a: 0 },
+      { q: 'К какому сроку нужен документ?', opts: ['Сегодня', 'На третий день', 'Через неделю'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Ich bin krank und kann heute nicht kommen.', ru: 'Я болен и сегодня не могу прийти.' },
+      { de: 'Ich habe Fieber.', ru: 'У меня температура.' },
+      { de: 'Ich gehe zum Arzt.', ru: 'Я иду к врачу.' },
+      { de: 'Ich schicke die Krankmeldung.', ru: 'Я пришлю больничный.' },
+      { de: 'Bis wann brauchen Sie das?', ru: 'До какого срока вам это нужно?' },
+      { de: 'Ich bin ab Montag wieder da.', ru: 'Я снова на месте с понедельника.' },
+      { de: 'Auf Wiederhören.', ru: 'До свидания (по телефону).' },
+      { de: 'Gute Besserung!', ru: 'Выздоравливайте!' },
+    ],
+    grammar: { t: 'Модальный глагол + инфинитив', ru: '«Ich KANN heute nicht KOMMEN.» Модальный глагол (kann, muss, darf, möchte) стоит вторым, а смысловой глагол — в самом конце. Это главный шаблон для просьб и объяснений.' },
+  },
+  {
+    id: 'urlaub', title: 'Попросить отпуск', cat: 'arbeit', emoji: '🏖️',
+    situation: 'Разговор с начальником о датах отпуска.',
+    roles: { A: 'Начальник', B: 'Ты' },
+    lines: [
+      { s: 'B', de: 'Ich möchte Urlaub beantragen. Geht das im August?', ru: 'Я хочу подать заявление на отпуск. Можно в августе?' },
+      { s: 'A', de: 'Wann genau?', ru: 'Когда именно?' },
+      { s: 'B', de: 'Vom vierten bis zum fünfzehnten August. Zwei Wochen.', ru: 'С четвёртого по пятнадцатое августа. Две недели.' },
+      { s: 'A', de: 'Hm, in der zweiten Woche sind schon zwei Kollegen weg.', ru: 'Хм, во вторую неделю уже двое коллег отсутствуют.' },
+      { s: 'B', de: 'Dann vielleicht vom elften bis zum zweiundzwanzigsten?', ru: 'Тогда, может быть, с одиннадцатого по двадцать второе?' },
+      { s: 'A', de: 'Das passt besser. Füllen Sie den Antrag aus, ich unterschreibe ihn.', ru: 'Так лучше. Заполните заявление, я подпишу.' },
+      { s: 'B', de: 'Wo bekomme ich das Formular?', ru: 'Где взять бланк?' },
+      { s: 'A', de: 'Im Büro bei Frau Weber oder im Portal.', ru: 'В офисе у госпожи Вебер или на портале.' },
+    ],
+    quiz: [
+      { q: 'Сколько недель отпуска хочет герой?', opts: ['Одну', 'Две', 'Три'], a: 1 },
+      { q: 'Почему первые даты не подходят?', opts: ['Много заказов', 'Двое коллег уже в отпуске', 'Начальник сам в отпуске'], a: 1 },
+      { q: 'Где взять бланк?', opts: ['У госпожи Вебер или на портале', 'У водителя', 'В столовой'], a: 0 },
+    ],
+    phrases: [
+      { de: 'Ich möchte Urlaub beantragen.', ru: 'Я хочу подать заявление на отпуск.' },
+      { de: 'Vom vierten bis zum fünfzehnten.', ru: 'С четвёртого по пятнадцатое.' },
+      { de: 'Geht das?', ru: 'Так можно?' },
+      { de: 'Das passt mir.', ru: 'Мне это подходит.' },
+      { de: 'Das passt mir leider nicht.', ru: 'Мне это, к сожалению, не подходит.' },
+      { de: 'Wo bekomme ich das Formular?', ru: 'Где мне взять бланк?' },
+      { de: 'Ich fülle den Antrag aus.', ru: 'Я заполняю заявление.' },
+      { de: 'Wann passt es Ihnen?', ru: 'Когда вам удобно?' },
+    ],
+    grammar: { t: 'Даты', ru: '«vom … bis zum …» + порядковое число с -ten: vom vierten (4.) bis zum fünfzehnten (15.). После 19: -sten: zwanzigsten, einundzwanzigsten. Пишут: «vom 4. bis zum 15. August».' },
+  },
+  {
+    id: 'pick', title: 'Инструктаж: комплектация', cat: 'arbeit', emoji: '📦',
+    situation: 'Коллега объясняет, как собрать заказ по листу подбора (Pickliste).',
+    roles: { A: 'Коллега', B: 'Ты' },
+    lines: [
+      { s: 'A', de: 'Hier ist die Pickliste. Zuerst Gang sieben, Regal C, dritte Ebene.', ru: 'Вот лист подбора. Сначала проход семь, стеллаж C, третий уровень.' },
+      { s: 'B', de: 'Gang sieben, Regal C, Ebene drei. Wie viele Kartons?', ru: 'Проход семь, стеллаж C, уровень три. Сколько коробок?' },
+      { s: 'A', de: 'Sechs Kartons, Artikelnummer vier-fünf-acht-neun. Scann jeden Karton.', ru: 'Шесть коробок, артикул 4-5-8-9. Сканируй каждую коробку.' },
+      { s: 'B', de: 'Jeden einzeln?', ru: 'Каждую отдельно?' },
+      { s: 'A', de: 'Ja, jeden einzeln. Dann auf die Palette, schwere Sachen nach unten.', ru: 'Да, каждую отдельно. Потом на паллету, тяжёлое вниз.' },
+      { s: 'B', de: 'Und wenn ein Artikel fehlt?', ru: 'А если какого-то артикула нет?' },
+      { s: 'A', de: 'Dann drückst du „Fehlbestand“ und sagst mir Bescheid.', ru: 'Тогда нажимаешь «Нет в наличии» и сообщаешь мне.' },
+      { s: 'B', de: 'Okay. Soll ich die Palette danach einwickeln?', ru: 'Хорошо. Потом обмотать паллету плёнкой?' },
+      { s: 'A', de: 'Genau, und ab damit zu Tor zwei.', ru: 'Именно, и к воротам два.' },
+    ],
+    quiz: [
+      { q: 'Сколько коробок нужно взять?', opts: ['Четыре', 'Шесть', 'Девять'], a: 1 },
+      { q: 'Как сканировать коробки?', opts: ['Только первую', 'Каждую отдельно', 'Всю паллету сразу'], a: 1 },
+      { q: 'Что делать, если артикула нет?', opts: ['Взять похожий', 'Нажать «Fehlbestand» и сообщить', 'Ничего'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Wie viele Kartons?', ru: 'Сколько коробок?' },
+      { de: 'Jeden einzeln?', ru: 'Каждую отдельно?' },
+      { de: 'Schwere Sachen nach unten.', ru: 'Тяжёлое — вниз.' },
+      { de: 'Ein Artikel fehlt.', ru: 'Одного артикула не хватает.' },
+      { de: 'Ich sage dir Bescheid.', ru: 'Я тебе сообщу.' },
+      { de: 'Soll ich das einwickeln?', ru: 'Мне это обмотать плёнкой?' },
+      { de: 'Wohin damit?', ru: 'Куда это?' },
+      { de: 'Welche Ebene?', ru: 'Какой уровень?' },
+    ],
+    grammar: { t: 'Повторяй, чтобы проверить', ru: 'Самый надёжный приём при инструктаже — повторить ключевые цифры: «Gang sieben, Regal C, Ebene drei?» Собеседник сразу поправит, если ты ослышался. Это нормально и профессионально.' },
+  },
+  {
+    id: 'sicher', title: 'Безопасность в цехе', cat: 'arbeit', emoji: '🦺',
+    situation: 'Ответственный по безопасности делает замечание и объясняет правила.',
+    roles: { A: 'Ответственный по безопасности', B: 'Ты' },
+    lines: [
+      { s: 'A', de: 'Achtung! Du darfst hier nicht ohne Warnweste laufen.', ru: 'Внимание! Здесь нельзя ходить без сигнального жилета.' },
+      { s: 'B', de: 'Entschuldigung, ich hole sie sofort.', ru: 'Извините, сейчас принесу.' },
+      { s: 'A', de: 'Und der Gang muss frei bleiben. Das ist der Fluchtweg.', ru: 'И проход должен оставаться свободным. Это путь эвакуации.' },
+      { s: 'B', de: 'Verstanden. Darf ich den Stapler fahren?', ru: 'Понял. Можно мне водить погрузчик?' },
+      { s: 'A', de: 'Hast du einen Staplerschein?', ru: 'У тебя есть права на погрузчик?' },
+      { s: 'B', de: 'Noch nicht. Ich mache ihn im November.', ru: 'Пока нет. Сдаю в ноябре.' },
+      { s: 'A', de: 'Dann nicht. Bis dahin nur den Hubwagen.', ru: 'Тогда нет. До тех пор только рохля.' },
+      { s: 'B', de: 'Alles klar. Wo ist der Erste-Hilfe-Kasten?', ru: 'Понятно. Где аптечка?' },
+      { s: 'A', de: 'Neben Tor eins, der grüne Kasten.', ru: 'Рядом с воротами один, зелёный ящик.' },
+    ],
+    quiz: [
+      { q: 'Чего не хватало герою?', opts: ['Каски', 'Сигнального жилета', 'Перчаток'], a: 1 },
+      { q: 'Почему проход должен быть свободным?', opts: ['Это путь эвакуации', 'Там ездит погрузчик', 'Там стоит начальник'], a: 0 },
+      { q: 'Когда герой сдаёт на права погрузчика?', opts: ['В октябре', 'В ноябре', 'В декабре'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Ich hole die Warnweste.', ru: 'Я принесу жилет.' },
+      { de: 'Der Gang muss frei bleiben.', ru: 'Проход должен оставаться свободным.' },
+      { de: 'Darf ich den Stapler fahren?', ru: 'Можно мне водить погрузчик?' },
+      { de: 'Ich habe keinen Staplerschein.', ru: 'У меня нет прав на погрузчик.' },
+      { de: 'Vorsicht!', ru: 'Осторожно!' },
+      { de: 'Wo ist der Erste-Hilfe-Kasten?', ru: 'Где аптечка?' },
+      { de: 'Das ist der Fluchtweg.', ru: 'Это путь эвакуации.' },
+      { de: 'Ich mache den Schein im November.', ru: 'Я сдаю на права в ноябре.' },
+    ],
+    grammar: { t: 'dürfen / müssen', ru: '«Du DARFST nicht» = тебе нельзя (запрет). «Der Gang MUSS frei bleiben» = должен (обязанность). «Darf ich …?» — вежливый вопрос о разрешении.' },
+  },
+  {
+    id: 'uebergabe', title: 'Передача смены', cat: 'arbeit', emoji: '🔄',
+    situation: 'Конец смены. Ты передаёшь дела коллеге из следующей смены.',
+    roles: { A: 'Коллега (следующая смена)', B: 'Ты' },
+    lines: [
+      { s: 'B', de: 'Hallo Markus, ich übergebe dir die Schicht.', ru: 'Привет, Маркус, передаю тебе смену.' },
+      { s: 'A', de: 'Hi. Gibt es etwas Besonderes?', ru: 'Привет. Есть что-то особенное?' },
+      { s: 'B', de: 'Ja. Tor zwei ist fertig, Tor drei ist halb fertig.', ru: 'Да. Ворота два готовы, ворота три — наполовину.' },
+      { s: 'A', de: 'Wie viele Paletten fehlen noch an Tor drei?', ru: 'Сколько паллет ещё не хватает у ворот три?' },
+      { s: 'B', de: 'Noch vier. Die Ware steht in Gang neun.', ru: 'Ещё четыре. Товар стоит в проходе девять.' },
+      { s: 'A', de: 'Okay. Probleme?', ru: 'Ок. Проблемы?' },
+      { s: 'B', de: 'Der Drucker im Büro hat kein Papier mehr. Und der LKW für Hamburg kommt erst um vier.', ru: 'В принтере в офисе закончилась бумага. И грузовик на Гамбург приедет только в четыре.' },
+      { s: 'A', de: 'Danke, gut zu wissen. Schönen Feierabend!', ru: 'Спасибо, полезно знать. Хорошего вечера!' },
+      { s: 'B', de: 'Danke, dir eine ruhige Schicht.', ru: 'Спасибо, тебе спокойной смены.' },
+    ],
+    quiz: [
+      { q: 'Какие ворота готовы полностью?', opts: ['Ворота два', 'Ворота три', 'Оба'], a: 0 },
+      { q: 'Где стоит товар для ворот три?', opts: ['В проходе четыре', 'В проходе девять', 'У ворот один'], a: 1 },
+      { q: 'Во сколько приедет грузовик на Гамбург?', opts: ['В два', 'В три', 'В четыре'], a: 2 },
+    ],
+    phrases: [
+      { de: 'Ich übergebe dir die Schicht.', ru: 'Я передаю тебе смену.' },
+      { de: 'Gibt es etwas Besonderes?', ru: 'Есть что-то особенное?' },
+      { de: 'Das ist fertig.', ru: 'Это готово.' },
+      { de: 'Das ist halb fertig.', ru: 'Это готово наполовину.' },
+      { de: 'Es fehlen noch vier.', ru: 'Не хватает ещё четырёх.' },
+      { de: 'Der LKW kommt erst um vier.', ru: 'Грузовик приедет только в четыре.' },
+      { de: 'Gut zu wissen.', ru: 'Полезно знать.' },
+      { de: 'Schönen Feierabend!', ru: 'Хорошего вечера после работы!' },
+    ],
+    grammar: { t: 'erst / schon / noch', ru: '«erst um vier» = только в четыре (позже, чем хотелось). «schon» = уже. «noch vier» = ещё четыре. Эти три слова делают речь точной и понятной.' },
+  },
+  {
+    id: 'pause', title: 'Перерыв с коллегами', cat: 'arbeit', emoji: '☕',
+    situation: 'Перерыв. Коллега заводит короткий разговор ни о чём (Smalltalk).',
+    roles: { A: 'Коллега', B: 'Ты' },
+    lines: [
+      { s: 'A', de: 'Na, wie läuft\'s?', ru: 'Ну, как дела?' },
+      { s: 'B', de: 'Ganz gut, aber heute ist viel los.', ru: 'Неплохо, но сегодня много работы.' },
+      { s: 'A', de: 'Ja, Montag halt. Was machst du am Wochenende?', ru: 'Да, понедельник же. Что делаешь на выходных?' },
+      { s: 'B', de: 'Ich fahre mit meiner Frau nach Freiburg. Und du?', ru: 'Еду с женой во Фрайбург. А ты?' },
+      { s: 'A', de: 'Ich gehe zum Fußball, Freiburg gegen Dortmund.', ru: 'Я иду на футбол, Фрайбург против Дортмунда.' },
+      { s: 'B', de: 'Oh, schön. Ich verstehe nicht viel von Fußball.', ru: 'О, здорово. Я не очень разбираюсь в футболе.' },
+      { s: 'A', de: 'Kein Problem. Willst du einen Kaffee? Ich gehe gerade zur Maschine.', ru: 'Не беда. Хочешь кофе? Я как раз иду к автомату.' },
+      { s: 'B', de: 'Gern, danke. Mit Milch, ohne Zucker.', ru: 'С удовольствием, спасибо. С молоком, без сахара.' },
+    ],
+    quiz: [
+      { q: 'Куда едет герой на выходных?', opts: ['В Дортмунд', 'Во Фрайбург', 'В Гамбург'], a: 1 },
+      { q: 'Что делает коллега на выходных?', opts: ['Идёт на футбол', 'Работает', 'Едет к родителям'], a: 0 },
+      { q: 'Какой кофе хочет герой?', opts: ['Чёрный', 'С молоком, без сахара', 'С сахаром'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Wie läuft\'s?', ru: 'Как дела? (неформально)' },
+      { de: 'Heute ist viel los.', ru: 'Сегодня много работы / суеты.' },
+      { de: 'Was machst du am Wochenende?', ru: 'Что делаешь на выходных?' },
+      { de: 'Ich fahre nach Freiburg.', ru: 'Я еду во Фрайбург.' },
+      { de: 'Ich verstehe nicht viel davon.', ru: 'Я в этом не очень разбираюсь.' },
+      { de: 'Willst du einen Kaffee?', ru: 'Хочешь кофе?' },
+      { de: 'Gern, danke.', ru: 'С удовольствием, спасибо.' },
+      { de: 'Mit Milch, ohne Zucker.', ru: 'С молоком, без сахара.' },
+    ],
+    grammar: { t: 'Smalltalk — это формулы', ru: 'Разговор ни о чём держится на 5–6 готовых фразах. Не нужно строить предложения: «Ganz gut.» «Viel los heute.» «Und du?» — этого достаточно, чтобы быть «своим».' },
+  },
+  {
+    id: 'arzt', title: 'Записаться к врачу', cat: 'alltag', emoji: '🩺',
+    situation: 'Звонок в практику врача, чтобы записаться на приём.',
+    roles: { A: 'Регистратура', B: 'Ты' },
+    lines: [
+      { s: 'A', de: 'Praxis Doktor Keller, guten Tag.', ru: 'Практика доктора Келлер, добрый день.' },
+      { s: 'B', de: 'Guten Tag, ich hätte gern einen Termin.', ru: 'Добрый день, я хотел бы записаться на приём.' },
+      { s: 'A', de: 'Sind Sie schon Patient bei uns?', ru: 'Вы уже наш пациент?' },
+      { s: 'B', de: 'Ja. Mein Name ist Alexander Petrow.', ru: 'Да. Меня зовут Александр Петров.' },
+      { s: 'A', de: 'Worum geht es?', ru: 'По какому поводу?' },
+      { s: 'B', de: 'Ich habe seit drei Tagen Rückenschmerzen.', ru: 'У меня три дня болит спина.' },
+      { s: 'A', de: 'Können Sie morgen um acht Uhr fünfzehn?', ru: 'Можете завтра в восемь пятнадцать?' },
+      { s: 'B', de: 'Ja, das passt. Soll ich etwas mitbringen?', ru: 'Да, подходит. Нужно что-то принести?' },
+      { s: 'A', de: 'Ihre Versichertenkarte, bitte.', ru: 'Вашу страховую карту, пожалуйста.' },
+      { s: 'B', de: 'Gut, danke. Bis morgen.', ru: 'Хорошо, спасибо. До завтра.' },
+    ],
+    quiz: [
+      { q: 'Что болит у героя?', opts: ['Голова', 'Спина', 'Зуб'], a: 1 },
+      { q: 'Во сколько приём?', opts: ['В 8:15', 'В 8:50', 'В 18:15'], a: 0 },
+      { q: 'Что нужно взять с собой?', opts: ['Паспорт', 'Страховую карту', 'Деньги'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Ich hätte gern einen Termin.', ru: 'Я хотел бы записаться на приём.' },
+      { de: 'Ich habe Rückenschmerzen.', ru: 'У меня болит спина.' },
+      { de: 'Seit drei Tagen.', ru: 'Уже три дня.' },
+      { de: 'Das passt.', ru: 'Подходит.' },
+      { de: 'Das passt leider nicht.', ru: 'К сожалению, не подходит.' },
+      { de: 'Soll ich etwas mitbringen?', ru: 'Мне нужно что-то принести?' },
+      { de: 'Ich bringe die Versichertenkarte mit.', ru: 'Я принесу страховую карту.' },
+      { de: 'Bis morgen.', ru: 'До завтра.' },
+    ],
+    grammar: { t: 'Ich hätte gern …', ru: 'Самая вежливая формула просьбы: «Ich hätte gern einen Termin / ein Brot / eine Auskunft.» Работает у врача, в булочной, в офисе. «Ich will» звучит грубо.' },
+  },
+  {
+    id: 'markt', title: 'В супермаркете', cat: 'alltag', emoji: '🛒',
+    situation: 'Ищешь товар, потом платишь на кассе.',
+    roles: { A: 'Сотрудник / кассир', B: 'Ты' },
+    lines: [
+      { s: 'B', de: 'Entschuldigung, wo finde ich Mehl?', ru: 'Извините, где мне найти муку?' },
+      { s: 'A', de: 'Gang vier, bei den Backwaren, unten im Regal.', ru: 'Проход четыре, у выпечки, внизу на полке.' },
+      { s: 'B', de: 'Danke. Und haben Sie auch Buchweizen?', ru: 'Спасибо. А гречка у вас есть?' },
+      { s: 'A', de: 'Buchweizen? Ja, beim Reis, Gang fünf.', ru: 'Гречка? Да, у риса, проход пять.' },
+      { s: 'A', de: 'Sammeln Sie Punkte?', ru: '(На кассе) Собираете баллы?' },
+      { s: 'B', de: 'Nein, danke. Kann ich mit Karte zahlen?', ru: 'Нет, спасибо. Можно заплатить картой?' },
+      { s: 'A', de: 'Ja, gern. Brauchen Sie eine Tüte?', ru: 'Да, конечно. Нужен пакет?' },
+      { s: 'B', de: 'Nein, ich habe eine dabei.', ru: 'Нет, у меня есть с собой.' },
+      { s: 'A', de: 'Das macht achtzehn Euro vierzig.', ru: 'С вас восемнадцать евро сорок.' },
+      { s: 'B', de: 'Bitte. Schönen Tag noch!', ru: 'Пожалуйста. Хорошего дня!' },
+    ],
+    quiz: [
+      { q: 'Где мука?', opts: ['Проход четыре', 'Проход пять', 'У кассы'], a: 0 },
+      { q: 'Как платит герой?', opts: ['Наличными', 'Картой', 'Баллами'], a: 1 },
+      { q: 'Сколько нужно заплатить?', opts: ['8,40 €', '18,40 €', '80,14 €'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Wo finde ich Mehl?', ru: 'Где мне найти муку?' },
+      { de: 'Haben Sie auch Buchweizen?', ru: 'А гречка у вас есть?' },
+      { de: 'Kann ich mit Karte zahlen?', ru: 'Можно заплатить картой?' },
+      { de: 'Ich habe eine Tüte dabei.', ru: 'У меня есть пакет с собой.' },
+      { de: 'Das macht achtzehn Euro vierzig.', ru: 'С вас 18 евро 40.' },
+      { de: 'Schönen Tag noch!', ru: 'Хорошего дня!' },
+      { de: 'Ich brauche keine Tüte.', ru: 'Мне не нужен пакет.' },
+      { de: 'Wo ist die Kasse?', ru: 'Где касса?' },
+    ],
+    grammar: { t: 'Цены на слух', ru: '«achtzehn Euro vierzig» = 18,40 €. Сначала евро, потом центы без слова «Cent». Внимание: «vierzehn» (14) и «vierzig» (40) звучат похоже — слушай окончание: -zehn / -zig.' },
+  },
+  {
+    id: 'amt', title: 'В Bürgerbüro', cat: 'alltag', emoji: '🏛️',
+    situation: 'Переехал в новую квартиру — нужно перерегистрироваться (Ummeldung).',
+    roles: { A: 'Сотрудник', B: 'Ты' },
+    lines: [
+      { s: 'A', de: 'Guten Tag, was kann ich für Sie tun?', ru: 'Добрый день, чем могу помочь?' },
+      { s: 'B', de: 'Ich möchte mich ummelden. Ich bin umgezogen.', ru: 'Я хочу перерегистрироваться. Я переехал.' },
+      { s: 'A', de: 'Haben Sie einen Termin?', ru: 'У вас есть запись?' },
+      { s: 'B', de: 'Ja, um zehn Uhr dreißig.', ru: 'Да, на десять тридцать.' },
+      { s: 'A', de: 'Gut. Ich brauche Ihren Ausweis und die Wohnungsgeberbestätigung.', ru: 'Хорошо. Мне нужен ваш паспорт и подтверждение от арендодателя.' },
+      { s: 'B', de: 'Entschuldigung, was bedeutet „Wohnungsgeberbestätigung“?', ru: 'Извините, что означает «Wohnungsgeberbestätigung»?' },
+      { s: 'A', de: 'Das ist ein Formular vom Vermieter. Er bestätigt, dass Sie dort wohnen.', ru: 'Это бланк от арендодателя. Он подтверждает, что вы там живёте.' },
+      { s: 'B', de: 'Ah ja, das habe ich. Hier bitte.', ru: 'А, да, это у меня есть. Вот, пожалуйста.' },
+      { s: 'A', de: 'Danke. Das dauert einen Moment.', ru: 'Спасибо. Это займёт минутку.' },
+    ],
+    quiz: [
+      { q: 'Зачем герой пришёл?', opts: ['Получить паспорт', 'Перерегистрироваться после переезда', 'Заплатить штраф'], a: 1 },
+      { q: 'Что такое Wohnungsgeberbestätigung?', opts: ['Договор аренды', 'Подтверждение от арендодателя', 'Счёт за квартиру'], a: 1 },
+      { q: 'Что сделал герой, когда не понял слово?', opts: ['Промолчал', 'Спросил, что оно означает', 'Ушёл'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Ich möchte mich ummelden.', ru: 'Я хочу перерегистрироваться.' },
+      { de: 'Ich bin umgezogen.', ru: 'Я переехал.' },
+      { de: 'Ich habe einen Termin um zehn Uhr dreißig.', ru: 'У меня запись на 10:30.' },
+      { de: 'Was bedeutet dieses Wort?', ru: 'Что означает это слово?' },
+      { de: 'Das habe ich dabei.', ru: 'Это у меня с собой.' },
+      { de: 'Hier bitte.', ru: 'Вот, пожалуйста.' },
+      { de: 'Welche Unterlagen brauche ich?', ru: 'Какие документы мне нужны?' },
+      { de: 'Wie lange dauert das?', ru: 'Сколько это займёт?' },
+    ],
+    grammar: { t: 'Длинные слова — это цепочки', ru: 'Wohnungs|geber|bestätigung = квартира + даватель + подтверждение. Немецкие «монстры» читаются справа налево: последнее слово главное (подтверждение), остальные уточняют. Не бойся переспросить: «Was bedeutet …?»' },
+  },
+  {
+    id: 'haus', title: 'Управдом: отопление', cat: 'alltag', emoji: '🔧',
+    situation: 'Не работает отопление. Разговор с управдомом (Hausmeister).',
+    roles: { A: 'Управдом', B: 'Ты' },
+    lines: [
+      { s: 'B', de: 'Guten Tag, Herr Braun. Die Heizung in der Küche funktioniert nicht.', ru: 'Добрый день, господин Браун. Отопление на кухне не работает.' },
+      { s: 'A', de: 'Seit wann?', ru: 'С какого времени?' },
+      { s: 'B', de: 'Seit gestern Abend. Sie bleibt kalt.', ru: 'Со вчерашнего вечера. Остаётся холодной.' },
+      { s: 'A', de: 'Haben Sie den Thermostat aufgedreht?', ru: 'Вы открыли термостат?' },
+      { s: 'B', de: 'Ja, auf fünf. Es passiert nichts.', ru: 'Да, на пятёрку. Ничего не происходит.' },
+      { s: 'A', de: 'Okay, ich komme morgen Vormittag vorbei. Sind Sie zu Hause?', ru: 'Хорошо, я зайду завтра до обеда. Вы будете дома?' },
+      { s: 'B', de: 'Ja, bis zwölf. Welche Uhrzeit ungefähr?', ru: 'Да, до двенадцати. Примерно во сколько?' },
+      { s: 'A', de: 'So gegen neun.', ru: 'Около девяти.' },
+      { s: 'B', de: 'Gut, danke. Bis morgen.', ru: 'Хорошо, спасибо. До завтра.' },
+    ],
+    quiz: [
+      { q: 'Что не работает?', opts: ['Свет', 'Отопление на кухне', 'Кран'], a: 1 },
+      { q: 'С какого времени?', opts: ['С утра', 'Со вчерашнего вечера', 'С прошлой недели'], a: 1 },
+      { q: 'Когда придёт управдом?', opts: ['Сегодня вечером', 'Завтра около девяти', 'Через неделю'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Die Heizung funktioniert nicht.', ru: 'Отопление не работает.' },
+      { de: 'Seit gestern.', ru: 'Со вчерашнего дня.' },
+      { de: 'Es passiert nichts.', ru: 'Ничего не происходит.' },
+      { de: 'Wann kommen Sie vorbei?', ru: 'Когда вы зайдёте?' },
+      { de: 'Ich bin bis zwölf zu Hause.', ru: 'Я дома до двенадцати.' },
+      { de: 'So gegen neun.', ru: 'Примерно в девять.' },
+      { de: 'Der Wasserhahn tropft.', ru: 'Кран капает.' },
+      { de: 'Das Licht im Flur geht nicht.', ru: 'Свет в коридоре не работает.' },
+    ],
+    grammar: { t: 'seit + время', ru: '«seit gestern», «seit drei Tagen», «seit Montag» — с какого момента. По-русски «уже три дня», по-немецки «seit drei Tagen» + настоящее время: «Sie bleibt kalt» (не прошедшее!).' },
+  },
+  {
+    id: 'bahn', title: 'На вокзале', cat: 'alltag', emoji: '🚆',
+    situation: 'Нужно уточнить поезд, путь и купить билет.',
+    roles: { A: 'Прохожий / сотрудник', B: 'Ты' },
+    lines: [
+      { s: 'B', de: 'Entschuldigung, fährt dieser Zug nach Offenburg?', ru: 'Извините, этот поезд идёт в Оффенбург?' },
+      { s: 'A', de: 'Nein, der hier fährt nach Basel. Der nach Offenburg kommt auf Gleis drei.', ru: 'Нет, этот идёт в Базель. На Оффенбург — на пути три.' },
+      { s: 'B', de: 'Um wie viel Uhr?', ru: 'Во сколько?' },
+      { s: 'A', de: 'Eigentlich um vierzehn Uhr zwölf, aber er hat zehn Minuten Verspätung.', ru: 'Вообще в 14:12, но он опаздывает на десять минут.' },
+      { s: 'B', de: 'Muss ich umsteigen?', ru: 'Мне нужно пересаживаться?' },
+      { s: 'A', de: 'Nein, der fährt direkt.', ru: 'Нет, он идёт напрямую.' },
+      { s: 'B', de: 'Und wo kann ich ein Ticket kaufen?', ru: 'А где можно купить билет?' },
+      { s: 'A', de: 'Am Automaten dort oder in der App.', ru: 'В автомате вон там или в приложении.' },
+      { s: 'B', de: 'Danke schön!', ru: 'Большое спасибо!' },
+    ],
+    quiz: [
+      { q: 'Куда идёт поезд, у которого стоит герой?', opts: ['В Оффенбург', 'В Базель', 'Во Фрайбург'], a: 1 },
+      { q: 'На каком пути поезд на Оффенбург?', opts: ['На первом', 'На втором', 'На третьем'], a: 2 },
+      { q: 'Нужна ли пересадка?', opts: ['Да', 'Нет', 'Непонятно'], a: 1 },
+    ],
+    phrases: [
+      { de: 'Fährt dieser Zug nach Offenburg?', ru: 'Этот поезд идёт в Оффенбург?' },
+      { de: 'Auf welchem Gleis?', ru: 'На каком пути?' },
+      { de: 'Um wie viel Uhr?', ru: 'Во сколько?' },
+      { de: 'Der Zug hat Verspätung.', ru: 'Поезд опаздывает.' },
+      { de: 'Muss ich umsteigen?', ru: 'Мне нужно пересаживаться?' },
+      { de: 'Wo kann ich ein Ticket kaufen?', ru: 'Где можно купить билет?' },
+      { de: 'Ist dieser Platz frei?', ru: 'Это место свободно?' },
+      { de: 'Ich bin zu spät.', ru: 'Я опаздываю.' },
+    ],
+    grammar: { t: 'Вопрос без вопросительного слова', ru: 'Глагол ставится на первое место: «FÄHRT dieser Zug nach …?», «MUSS ich umsteigen?», «HABEN Sie …?». Интонация вверх. Это самый частый тип вопроса в быту.' },
+  },
+];
+
+// Темы для свободного разговора с ИИ-собеседником
+const TALK_TOPICS = [
+  { id: 'frei', title: 'Свободный разговор', hint: 'Собеседник сам задаёт простые вопросы о твоём дне, работе, семье.', role: 'ein freundlicher deutscher Kollege in der Kaffeepause' },
+  { id: 'schicht', title: 'Руководитель смены', hint: 'Начало смены: задания, перерывы, вопросы.', role: 'der Schichtleiter in einem Logistiklager. Du verteilst Aufgaben und beantwortest Fragen' },
+  { id: 'lieferung', title: 'Водитель с поставкой', hint: 'Приём товара: накладная, количество, подпись.', role: 'ein LKW-Fahrer, der eine Lieferung bringt. Du willst schnell abladen und eine Unterschrift' },
+  { id: 'problem', title: 'Начальник: проблема', hint: 'Ты сообщаешь о поломке или опасности.', role: 'der Vorgesetzte im Lager. Der Lernende meldet dir ein Problem; du stellst Rückfragen' },
+  { id: 'krank', title: 'Звонок: заболел', hint: 'Телефонный разговор с офисом.', role: 'die Person im Büro, die den Anruf entgegennimmt. Der Lernende meldet sich krank' },
+  { id: 'urlaub', title: 'Отпуск', hint: 'Договориться о датах отпуска.', role: 'der Chef. Der Lernende will Urlaub beantragen; manche Termine passen nicht' },
+  { id: 'arzt', title: 'Регистратура врача', hint: 'Записаться на приём, объяснить, что болит.', role: 'die Sprechstundenhilfe in einer Arztpraxis am Telefon' },
+  { id: 'markt', title: 'Супермаркет', hint: 'Найти товар, заплатить на кассе.', role: 'ein Mitarbeiter im Supermarkt, dann die Kassiererin' },
+  { id: 'amt', title: 'Bürgerbüro', hint: 'Перерегистрация, документы.', role: 'ein Sachbearbeiter im Bürgerbüro' },
+  { id: 'haus', title: 'Управдом', hint: 'Что-то сломалось в квартире.', role: 'der Hausmeister des Wohnhauses' },
+  { id: 'bahn', title: 'На вокзале', hint: 'Поезд, путь, билет, пересадка.', role: 'ein Mitarbeiter der Bahn am Bahnsteig' },
+  { id: 'vorstellung', title: 'Представиться', hint: 'Рассказать о себе новому коллеге: откуда, что делал раньше, семья.', role: 'ein neuer Kollege, der den Lernenden kennenlernen möchte' },
+];
+
+// ===================== Хранилище =====================
+const STORE_KEY = 'sprechraum_v1';
+const DEFAULT_STATE = {
+  name: '', rate: 0.8, voiceName: '', apiKey: '', showTextFirst: false,
+  cards: {},            // id -> {box, due, seen, ok}
+  scen: {},             // scenarioId -> {heard, quiz, spoken, dict}
+  days: {},             // 'YYYY-MM-DD' -> {acts, min}
+  talkTurns: 0,
+};
+let S = loadState();
+function loadState() {
+  try { const raw = localStorage.getItem(STORE_KEY); if (raw) return Object.assign({}, DEFAULT_STATE, JSON.parse(raw)); } catch (e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) {} }
+function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function logAct(n) { const t = today(); S.days[t] = S.days[t] || { acts: 0 }; S.days[t].acts += (n || 1); save(); }
+function streak() {
+  let n = 0; const d = new Date();
+  if (!S.days[today()]) d.setDate(d.getDate() - 1);
+  for (;;) { const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); if (S.days[k] && S.days[k].acts > 0) { n++; d.setDate(d.getDate() - 1); } else break; }
+  return n;
+}
+
+// ===================== Карточки (все фразы) =====================
+const ALL_SETS = [BASIS].concat(SCENARIOS);
+const CARDS = [];
+ALL_SETS.forEach(set => set.phrases.forEach((p, i) => CARDS.push({ id: set.id + ':' + i, set: set.id, setTitle: set.title, de: p.de, ru: p.ru })));
+const INTERVALS = [0, 1, 3, 7, 14, 30, 60];
+function cardState(id) { return S.cards[id] || { box: 0, due: 0, seen: 0, ok: 0 }; }
+function dueCards() { const now = Date.now(); return CARDS.filter(c => { const st = cardState(c.id); return st.due <= now; }); }
+function rateCard(id, grade) { // 0 = не знал, 1 = с трудом, 2 = легко
+  const st = cardState(id); st.seen++;
+  if (grade === 0) st.box = 0; else if (grade === 1) st.box = Math.max(1, st.box); else st.box = Math.min(INTERVALS.length - 1, st.box + 1);
+  if (grade > 0) st.ok++;
+  const days = INTERVALS[st.box]; st.due = Date.now() + (days === 0 ? 10 * 60 * 1000 : days * 864e5);
+  S.cards[id] = st; logAct(1); save();
+}
+function knownCount() { return CARDS.filter(c => cardState(c.id).box >= 3).length; }
+
+// ===================== Речь: синтез =====================
+const synth = window.speechSynthesis;
+let voices = [];
+function loadVoices() { try { voices = synth ? synth.getVoices().filter(v => /^de/i.test(v.lang)) : []; } catch (e) { voices = []; } fillVoiceSelect(); }
+if (synth) { loadVoices(); synth.onvoiceschanged = loadVoices; }
+function pickVoice() {
+  if (!voices.length) return null;
+  if (S.voiceName) { const v = voices.find(v => v.name === S.voiceName); if (v) return v; }
+  const pref = voices.find(v => /Google Deutsch|Anna|Petra|Katja|Helena|Vicki/i.test(v.name)) || voices.find(v => v.lang === 'de-DE') || voices[0];
+  return pref;
+}
+let speakToken = 0;
+function speak(text, rate) {
+  return new Promise(resolve => {
+    if (!synth) { resolve(false); return; }
+    synth.cancel(); const my = ++speakToken;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE'; u.rate = rate || S.rate; u.pitch = 1;
+    const v = pickVoice(); if (v) u.voice = v;
+    u.onend = () => { if (my === speakToken) resolve(true); };
+    u.onerror = () => resolve(false);
+    document.querySelectorAll('.speaking').forEach(el => el.classList.remove('speaking'));
+    synth.speak(u);
+    // страховка от зависания синтеза в Chrome
+    setTimeout(() => { if (my === speakToken && !synth.speaking) resolve(true); }, Math.max(4000, text.length * 120 / (rate || S.rate)));
+  });
+}
+function stopSpeak() { if (synth) synth.cancel(); speakToken++; }
+
+// ===================== Речь: распознавание =====================
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let micState = SR ? 'unknown' : 'none'; // unknown | ok | blocked | none
+let recActive = null;
+function listen(onInterim) {
+  return new Promise((resolve, reject) => {
+    if (!SR) { micState = 'none'; reject(new Error('nosr')); return; }
+    stopSpeak();
+    const r = new SR(); recActive = r;
+    r.lang = 'de-DE'; r.interimResults = true; r.maxAlternatives = 3; r.continuous = false;
+    let finalText = '', got = false;
+    r.onresult = ev => {
+      let interim = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) { const t = ev.results[i][0].transcript; if (ev.results[i].isFinal) finalText += t; else interim += t; }
+      if (onInterim) onInterim(finalText || interim);
+      got = true;
+    };
+    r.onerror = ev => { recActive = null; if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') { micState = 'blocked'; } reject(new Error(ev.error || 'error')); };
+    r.onend = () => { recActive = null; if (micState !== 'blocked') micState = 'ok'; resolve((finalText || '').trim()); };
+    try { r.start(); } catch (e) { reject(e); }
+    setTimeout(() => { try { if (recActive === r) r.stop(); } catch (e) {} }, 12000);
+  });
+}
+function stopListen() { try { if (recActive) recActive.stop(); } catch (e) {} }
+
+// ===================== Сравнение текстов =====================
+function norm(s) {
+  return (s || '').toLowerCase().replace(/ß/g, 'ss').replace(/[„“"'’«».,!?;:…()\-–—/]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function tokens(s) { return norm(s).split(' ').filter(Boolean); }
+function similar(a, b) { // похожесть слов (опечатки распознавания)
+  if (a === b) return true; if (Math.abs(a.length - b.length) > 2) return false;
+  const m = a.length, n = b.length; const dp = Array.from({ length: m + 1 }, (_, i) => [i].concat(Array(n).fill(0)));
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return dp[m][n] <= (a.length > 5 ? 2 : 1);
+}
+function compare(expected, said) {
+  const E = tokens(expected), H = tokens(said);
+  const m = E.length, n = H.length; const L = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = m - 1; i >= 0; i--) for (let j = n - 1; j >= 0; j--) L[i][j] = similar(E[i], H[j]) ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const hit = Array(m).fill(false); let i = 0, j = 0;
+  while (i < m && j < n) { if (similar(E[i], H[j])) { hit[i] = true; i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
+  const score = m ? Math.round(100 * hit.filter(Boolean).length / m) : 0;
+  const words = expected.split(/\s+/); let k = 0;
+  const html = words.map(w => { const t = tokens(w); if (!t.length) return esc(w); const ok = hit[k]; k += t.length; return '<span class="' + (ok ? 'w-ok' : 'w-miss') + '">' + esc(w) + '</span>'; }).join(' ');
+  return { score, html };
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+// ===================== ИИ-собеседник =====================
+let sampleFn = null, sampleChecked = false;
+async function getSample() {
+  if (sampleChecked) return sampleFn; sampleChecked = true;
+  try { if (window.claude && window.claude.use) sampleFn = await window.claude.use('sample'); } catch (e) { sampleFn = null; }
+  return sampleFn;
+}
+function tutorSystem(topic) {
+  const name = S.name ? ' Der Lernende heißt ' + S.name + '.' : '';
+  return 'Du bist ' + topic.role + '. Du sprichst mit einem 50-jährigen russischsprachigen Lernenden auf Niveau A1–A2.' + name +
+    ' Regeln: Sprich NUR sehr einfaches Deutsch (kurze Hauptsätze, Präsens oder Perfekt, maximal 2 Sätze pro Antwort, dann EINE einfache Frage).' +
+    ' Benutze Wörter aus dem Alltag und aus Lager/Logistik. Keine Nebensätze mit "obwohl/während". Sei geduldig und freundlich, bleib in deiner Rolle.' +
+    ' Wenn der Lernende Fehler macht: antworte trotzdem natürlich, aber gib separat eine kurze Korrektur. Wenn der Lernende Russisch schreibt oder "Hilfe" sagt, hilf ihm kurz auf Russisch, wie er es auf Deutsch sagen kann.' +
+    ' Antworte IMMER als JSON-Objekt ohne Markdown: {"reply": "<deine deutsche Antwort>", "reply_ru": "<Übersetzung deiner Antwort ins Russische>", "fix": "<korrigierte Version des Satzes des Lernenden oder leer>", "tip_ru": "<ein Satz auf Russisch: was war der Fehler, oder leer>"}';
+}
+async function askTutor(topic, history) {
+  const sys = tutorSystem(topic);
+  const s = await getSample();
+  if (s) {
+    const msgs = [{ role: 'user', content: sys + '\n\nBeginne das Gespräch mit einer Begrüßung und einer einfachen Frage.' }];
+    history.forEach((h, i) => { if (i === 0 && h.role === 'assistant') msgs.push({ role: 'assistant', content: JSON.stringify(h.json) }); else if (h.role === 'assistant') msgs.push({ role: 'assistant', content: JSON.stringify(h.json) }); else msgs.push({ role: 'user', content: h.text }); });
+    const res = await s(msgs, { cache: false, modelTier: 'default' });
+    return parseTutor(res.text);
+  }
+  if (S.apiKey) {
+    const msgs = [];
+    history.forEach(h => msgs.push(h.role === 'assistant' ? { role: 'assistant', content: JSON.stringify(h.json) } : { role: 'user', content: h.text }));
+    if (!msgs.length || msgs[0].role !== 'user') msgs.unshift({ role: 'user', content: 'Beginne das Gespräch mit einer Begrüßung und einer einfachen Frage.' });
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': S.apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-5-5', max_tokens: 400, system: sys, messages: msgs }),
+    });
+    if (!resp.ok) throw new Error('API ' + resp.status);
+    const data = await resp.json();
+    return parseTutor((data.content || []).map(c => c.text || '').join(''));
+  }
+  throw new Error('no-tutor');
+}
+function parseTutor(text) {
+  try { const m = text.match(/\{[\s\S]*\}/); const j = JSON.parse(m ? m[0] : text); if (j.reply) return { reply: j.reply, reply_ru: j.reply_ru || '', fix: j.fix || '', tip_ru: j.tip_ru || '' }; } catch (e) {}
+  return { reply: text.trim(), reply_ru: '', fix: '', tip_ru: '' };
+}
+
+// ===================== Навигация =====================
+const $ = sel => document.querySelector(sel);
+const app = $('#app');
+let view = 'home', viewArg = null;
+function go(v, arg) { stopSpeak(); stopListen(); view = v; viewArg = arg; render(); window.scrollTo(0, 0); }
+document.querySelectorAll('.nav button').forEach(b => b.addEventListener('click', () => go(b.dataset.v)));
+function render() {
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.v === view || (view.startsWith(b.dataset.v + '-'))));
+  const fn = VIEWS[view] || VIEWS.home; app.innerHTML = ''; fn(app, viewArg);
+}
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const k in attrs) { if (k === 'class') el.className = attrs[k]; else if (k === 'html') el.innerHTML = attrs[k]; else if (k.startsWith('on')) el.addEventListener(k.slice(2), attrs[k]); else if (attrs[k] != null) el.setAttribute(k, attrs[k]); }
+  kids.flat().forEach(k => { if (k == null || k === false) return; el.append(k.nodeType ? k : document.createTextNode(String(k))); });
+  return el;
+}
+function speakBtn(text, cls) { const b = h('button', { class: 'icon-btn ' + (cls || ''), title: 'Прослушать', 'aria-label': 'Прослушать' }, '🔊'); b.addEventListener('click', async e => { e.stopPropagation(); b.classList.add('speaking'); await speak(text); b.classList.remove('speaking'); }); return b; }
+function micHint() {
+  if (micState === 'none') return h('p', { class: 'hint warn' }, 'В этом браузере нет распознавания речи. Открой приложение в Chrome (Android или компьютер) — тогда можно будет говорить вслух. Пока оценивай себя сам.');
+  if (micState === 'blocked') return h('p', { class: 'hint warn' }, 'Микрофон здесь недоступен. Сохрани файл приложения и открой его в Chrome — тогда заработает режим «говори вслух». Пока оценивай себя сам: скажи фразу вслух и нажми, насколько получилось.');
+  return null;
+}
+
+// ===================== Экраны =====================
+const VIEWS = {};
+
+VIEWS.home = root => {
+  const due = dueCards().length;
+  const nextScen = SCENARIOS.find(s => !(S.scen[s.id] && S.scen[s.id].heard)) || SCENARIOS[0];
+  const st = streak();
+  const greet = S.name ? 'Hallo, ' + S.name + '!' : 'Hallo!';
+  root.append(
+    h('header', { class: 'hero' },
+      h('p', { class: 'eyebrow' }, 'Sprechraum · немецкий для жизни и работы'),
+      h('h1', null, greet),
+      h('p', { class: 'lead' }, 'Сегодня — 15 минут. Три шага, по порядку. Говори вслух, даже если один дома.'),
+    ),
+    h('section', { class: 'stats' },
+      stat(st, st === 1 ? 'день подряд' : (st >= 2 && st <= 4 ? 'дня подряд' : 'дней подряд')),
+      stat(knownCount(), 'фраз в активе', CARDS.length),
+      stat(masteredScen(), 'ситуаций закрыто', SCENARIOS.length),
+    ),
+    h('section', { class: 'plan' },
+      planStep(1, 'Повторить фразы', due ? due + ' к повторению' : 'На сегодня всё повторено', due ? 'Начать' : 'Ещё раз', () => go('phrasen'), !due),
+      planStep(2, 'Послушать диалог', nextScen.emoji + ' ' + nextScen.title, 'Слушать', () => go('hoeren-play', nextScen.id), false),
+      planStep(3, 'Поговорить 5 минут', 'Разговор с терпеливым собеседником', 'Говорить', () => go('talk'), false),
+    ),
+    h('section', { class: 'card tip' },
+      h('h3', null, 'Как заниматься, чтобы заговорить'),
+      h('ul', null,
+        h('li', null, 'Сначала слушай диалог без текста. Понял хотя бы половину — уже хорошо.'),
+        h('li', null, 'Повторяй фразы вслух сразу после диктора («тень»). Темп, не точность.'),
+        h('li', null, 'Учи целые фразы, а не слова. «Könnten Sie das wiederholen?» — одна единица.'),
+        h('li', null, 'Ошибки в разговоре — норма. Задача: быть понятым, а не говорить правильно.'),
+      ),
+    ),
+  );
+};
+function stat(n, label, of) { return h('div', { class: 'stat' }, h('div', { class: 'num' }, String(n), of ? h('span', { class: 'of' }, ' / ' + of) : null), h('div', { class: 'lbl' }, label)); }
+function planStep(n, title, sub, btn, fn, done) {
+  return h('div', { class: 'step' + (done ? ' done' : '') }, h('div', { class: 'step-n' }, done ? '✓' : String(n)), h('div', { class: 'step-body' }, h('div', { class: 'step-t' }, title), h('div', { class: 'step-s' }, sub)), h('button', { class: 'btn', onclick: fn }, btn));
+}
+function masteredScen() { return SCENARIOS.filter(s => { const x = S.scen[s.id]; return x && x.heard && x.quiz >= 2 && x.spoken; }).length; }
+
+// ---------- Слушать ----------
+VIEWS.hoeren = root => {
+  root.append(h('h1', null, 'Слушать'), h('p', { class: 'lead' }, 'Диалоги из реальных ситуаций. Сначала без текста, потом с текстом, потом проверка.'));
+  ['arbeit', 'alltag'].forEach(cat => {
+    root.append(h('h2', { class: 'cat' }, cat === 'arbeit' ? 'На работе' : 'В быту'));
+    const list = h('div', { class: 'list' });
+    SCENARIOS.filter(s => s.cat === cat).forEach(s => {
+      const x = S.scen[s.id] || {};
+      list.append(h('button', { class: 'row', onclick: () => go('hoeren-play', s.id) },
+        h('span', { class: 'row-emoji' }, s.emoji),
+        h('span', { class: 'row-body' }, h('span', { class: 'row-t' }, s.title), h('span', { class: 'row-s' }, s.situation)),
+        h('span', { class: 'badges' }, x.heard ? h('span', { class: 'badge ok' }, '🎧') : null, x.quiz >= 2 ? h('span', { class: 'badge ok' }, '✓ ' + x.quiz + '/3') : null, x.spoken ? h('span', { class: 'badge ok' }, '🗣') : null),
+      ));
+    });
+    root.append(list);
+  });
+  root.append(h('h2', { class: 'cat' }, 'Тренажёр'), h('div', { class: 'list' }, h('button', { class: 'row', onclick: () => go('zahlen') }, h('span', { class: 'row-emoji' }, '🔢'), h('span', { class: 'row-body' }, h('span', { class: 'row-t' }, 'Числа, цены, время на слух'), h('span', { class: 'row-s' }, 'Артикулы, количество, часы — то, что переспрашивают чаще всего')))));
+};
+
+VIEWS['hoeren-play'] = (root, id) => {
+  const sc = SCENARIOS.find(s => s.id === id); if (!sc) return VIEWS.hoeren(root);
+  let showText = S.showTextFirst; let phase = 'listen'; // listen | quiz | dict
+  const head = h('div', { class: 'topbar' }, h('button', { class: 'link', onclick: () => go('hoeren') }, '← Диалоги'), rateCtl());
+  root.append(head, h('h1', null, sc.emoji + ' ' + sc.title), h('p', { class: 'lead' }, sc.situation));
+  const roles = h('p', { class: 'roles' }, 'A — ' + sc.roles.A + ' · B — ' + sc.roles.B);
+  root.append(roles);
+  const ctl = h('div', { class: 'ctl' });
+  const dlg = h('div', { class: 'dialog' });
+  const after = h('div');
+  root.append(ctl, dlg, after);
+  function renderDialog() {
+    dlg.innerHTML = '';
+    sc.lines.forEach((ln, i) => {
+      const line = h('div', { class: 'line ' + (ln.s === 'B' ? 'me' : 'other') + (showText ? '' : ' hidden-text') },
+        h('div', { class: 'who' }, ln.s),
+        h('div', { class: 'bubble' },
+          h('div', { class: 'de' }, ln.de),
+          h('div', { class: 'ru' }, ln.ru),
+          h('div', { class: 'masked' }, 'Строка ' + (i + 1) + ' — нажми ▶, чтобы прослушать'),
+        ),
+      );
+      line.append(h('div', { class: 'line-btns' }, lineBtn(line, ln.de)));
+      line.addEventListener('click', () => { if (!showText) line.classList.toggle('reveal'); });
+      dlg.append(line);
+    });
+  }
+  function lineBtn(line, text) { const b = h('button', { class: 'icon-btn' }, '▶'); b.addEventListener('click', async e => { e.stopPropagation(); line.classList.add('speaking'); await speak(text); line.classList.remove('speaking'); }); return b; }
+  let playing = false;
+  async function playAll() {
+    if (playing) { playing = false; stopSpeak(); return; }
+    playing = true; btnAll.textContent = '■ Стоп';
+    const lines = dlg.querySelectorAll('.line');
+    for (let i = 0; i < sc.lines.length && playing; i++) { lines[i].classList.add('speaking'); lines[i].scrollIntoView({ block: 'center', behavior: 'smooth' }); await speak(sc.lines[i].de); lines[i].classList.remove('speaking'); if (playing) await new Promise(r => setTimeout(r, 700)); }
+    playing = false; btnAll.textContent = '▶ Весь диалог';
+    if (!S.scen[sc.id]) S.scen[sc.id] = {}; if (!S.scen[sc.id].heard) { S.scen[sc.id].heard = true; logAct(2); save(); }
+  }
+  const btnAll = h('button', { class: 'btn primary', onclick: playAll }, '▶ Весь диалог');
+  const btnText = h('button', { class: 'btn', onclick: () => { showText = !showText; btnText.textContent = showText ? 'Скрыть текст' : 'Показать текст'; renderDialog(); } }, showText ? 'Скрыть текст' : 'Показать текст');
+  ctl.append(btnAll, btnText, h('button', { class: 'btn', onclick: () => showQuiz() }, 'Проверить понимание'));
+  renderDialog();
+  if (!showText) root.insertBefore(h('p', { class: 'hint' }, 'Первый раз слушай без текста. Нажми на строку, чтобы подсмотреть. Понял смысл — хорошо; слова по одному не важны.'), ctl);
+
+  function showQuiz() {
+    after.innerHTML = ''; let correct = 0, answered = 0;
+    const box = h('section', { class: 'card quiz' }, h('h3', null, 'Что ты понял?'));
+    sc.quiz.forEach((q, qi) => {
+      const qEl = h('div', { class: 'q' }, h('p', { class: 'q-t' }, q.q));
+      const opts = h('div', { class: 'opts' });
+      q.opts.forEach((o, oi) => opts.append(h('button', { class: 'opt', onclick: ev => { if (qEl.dataset.done) return; qEl.dataset.done = '1'; answered++; const ok = oi === q.a; if (ok) correct++; ev.target.classList.add(ok ? 'right' : 'wrong'); if (!ok) opts.children[q.a].classList.add('right'); if (answered === sc.quiz.length) finishQuiz(); } }, o)));
+      qEl.append(opts); box.append(qEl);
+    });
+    const res = h('div', { class: 'q-res' }); box.append(res); after.append(box); box.scrollIntoView({ behavior: 'smooth' });
+    function finishQuiz() {
+      const x = S.scen[sc.id] = S.scen[sc.id] || {}; x.quiz = Math.max(x.quiz || 0, correct); logAct(2); save();
+      res.append(h('p', { class: 'big' }, correct + ' из ' + sc.quiz.length + (correct === 3 ? ' — отлично!' : correct === 2 ? ' — хорошо, суть ты понял.' : ' — послушай ещё раз с текстом, потом без.')),
+        h('div', { class: 'ctl' }, h('button', { class: 'btn primary', onclick: () => showDict() }, 'Диктант: одна фраза'), h('button', { class: 'btn', onclick: () => go('sprechen-play', sc.id) }, 'Теперь говорить →')));
+    }
+  }
+  function showDict() {
+    after.innerHTML = '';
+    const pick = sc.lines.filter(l => l.s === 'B'); const ln = pick[Math.floor(Math.random() * pick.length)];
+    const inp = h('input', { class: 'input', id: 'dict-inp', placeholder: 'Напиши, что услышал', autocomplete: 'off', autocapitalize: 'off' });
+    const out = h('div', { class: 'cmp' });
+    const box = h('section', { class: 'card' }, h('h3', null, 'Диктант'), h('p', { class: 'hint' }, 'Прослушай и запиши фразу. Орфография не важна — важно поймать слова.'),
+      h('div', { class: 'ctl' }, speakBtn(ln.de, 'big'), h('button', { class: 'btn', onclick: () => speak(ln.de, Math.max(0.5, S.rate - 0.2)) }, '🐢 Медленно')),
+      inp, h('div', { class: 'ctl' }, h('button', { class: 'btn primary', onclick: check }, 'Проверить'), h('button', { class: 'btn', onclick: () => go('sprechen-play', sc.id) }, 'Теперь говорить →')), out);
+    function check() { const r = compare(ln.de, inp.value); out.innerHTML = '<p class="big">' + r.score + '%</p><p class="de">' + r.html + '</p><p class="ru">' + esc(ln.ru) + '</p>'; const x = S.scen[sc.id] = S.scen[sc.id] || {}; x.dict = Math.max(x.dict || 0, r.score); logAct(1); save(); }
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+    after.append(box); box.scrollIntoView({ behavior: 'smooth' }); speak(ln.de);
+  }
+  after.append(h('section', { class: 'card grammar' }, h('h3', null, '📐 ' + sc.grammar.t), h('p', null, sc.grammar.ru)));
+};
+
+function rateCtl() {
+  const wrap = h('div', { class: 'rate' }, h('span', { class: 'rate-l' }, 'Темп'));
+  [['0.65', '🐢'], ['0.8', 'норм'], ['1', '🏃']].forEach(([v, l]) => { const b = h('button', { class: 'chip' + (Math.abs(S.rate - parseFloat(v)) < 0.01 ? ' on' : ''), onclick: () => { S.rate = parseFloat(v); save(); wrap.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b)); } }, l); wrap.append(b); });
+  return wrap;
+}
+
+// ---------- Числа ----------
+VIEWS.zahlen = root => {
+  root.append(h('div', { class: 'topbar' }, h('button', { class: 'link', onclick: () => go('hoeren') }, '← Диалоги'), rateCtl()), h('h1', null, '🔢 Числа на слух'), h('p', { class: 'lead' }, 'Диктор называет число, цену или время. Запиши цифрами. Это самый частый источник ошибок на складе и в магазине.'));
+  const modes = [['n100', 'До 100'], ['n1000', 'До 10 000'], ['preis', 'Цены'], ['zeit', 'Время'], ['artikel', 'Артикул']];
+  let mode = 'n100', cur = null, total = 0, right = 0;
+  const modeBar = h('div', { class: 'chips' });
+  modes.forEach(([m, l]) => modeBar.append(h('button', { class: 'chip' + (m === mode ? ' on' : ''), onclick: ev => { mode = m; modeBar.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === ev.target)); next(); } }, l)));
+  const inp = h('input', { class: 'input big-inp', id: 'zahl-inp', inputmode: 'decimal', placeholder: '…', autocomplete: 'off' });
+  const out = h('div', { class: 'cmp' }); const score = h('p', { class: 'hint' });
+  root.append(modeBar, h('div', { class: 'ctl' }, speakBtn('', 'big'), h('button', { class: 'btn', onclick: () => cur && speak(cur.say, Math.max(0.5, S.rate - 0.2)) }, '🐢 Медленно')), inp, h('div', { class: 'ctl' }, h('button', { class: 'btn primary', onclick: check }, 'Проверить'), h('button', { class: 'btn', onclick: next }, 'Дальше →')), out, score);
+  const sb = root.querySelector('.icon-btn.big'); sb.onclick = () => cur && speak(cur.say);
+  const r = n => Math.floor(Math.random() * n);
+  function gen() {
+    if (mode === 'n100') { const n = r(100); return { say: String(n), answer: String(n), show: String(n) }; }
+    if (mode === 'n1000') { const n = 100 + r(9900); return { say: String(n), answer: String(n), show: String(n) }; }
+    if (mode === 'preis') { const e = r(60), c = [0, 10, 20, 25, 40, 49, 50, 75, 90, 95, 99][r(11)]; const say = e + ' Euro' + (c ? ' ' + c : ''); const show = e + ',' + String(c).padStart(2, '0') + ' €'; return { say, answer: e + ',' + String(c).padStart(2, '0'), alt: [e + '.' + String(c).padStart(2, '0'), e + ',' + c, e + '.' + c, c === 0 ? String(e) : null], show }; }
+    if (mode === 'zeit') { const hh = r(24), mm = [0, 15, 30, 45, 5, 10, 20, 40, 50][r(9)]; const forms = []; const h12 = hh % 12 || 12, hNext = (h12 % 12) + 1; if (mm === 0) forms.push(hh + ' Uhr'); if (mm === 30) forms.push('halb ' + hNext); if (mm === 15) forms.push('Viertel nach ' + h12); if (mm === 45) forms.push('Viertel vor ' + hNext); forms.push(hh + ' Uhr ' + (mm ? mm : '')); const say = forms[r(forms.length)]; const show = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0'); const alts = [show, hh + ':' + String(mm).padStart(2, '0'), h12 + ':' + String(mm).padStart(2, '0'), String(h12).padStart(2, '0') + ':' + String(mm).padStart(2, '0')]; return { say, answer: show, alt: alts, show: show + ' («' + say + '»)' }; }
+    const d = [r(10), r(10), r(10), r(10)]; const say = d.join('-'); return { say: say.replace(/-/g, ' , '), answer: d.join(''), show: d.join(''), spoken: say };
+  }
+  function next() { cur = gen(); inp.value = ''; out.innerHTML = ''; inp.focus(); speak(cur.say); }
+  function check() {
+    if (!cur) return; total++; const v = inp.value.trim().replace(/\s/g, '').replace('€', '');
+    const ok = v === cur.answer || (cur.alt || []).filter(Boolean).includes(v);
+    if (ok) right++;
+    out.innerHTML = '<p class="big ' + (ok ? 'good' : 'bad') + '">' + (ok ? 'Верно!' : 'Нет') + '</p><p class="de">' + esc(cur.show) + '</p>';
+    score.textContent = right + ' из ' + total; logAct(1);
+    if (ok) setTimeout(next, 900);
+  }
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { if (out.innerHTML && out.querySelector('.good')) next(); else check(); } });
+  next();
+};
+
+// ---------- Говорить ----------
+VIEWS.sprechen = root => {
+  root.append(h('h1', null, 'Говорить'), h('p', { class: 'lead' }, 'Два упражнения на каждую ситуацию: «тень» (повторяй за диктором) и ролевая игра (твои реплики — сам).'));
+  const list = h('div', { class: 'list' });
+  list.append(h('button', { class: 'row', onclick: () => go('sprechen-play', 'basis') }, h('span', { class: 'row-emoji' }, '🛟'), h('span', { class: 'row-body' }, h('span', { class: 'row-t' }, BASIS.title), h('span', { class: 'row-s' }, BASIS.intro))));
+  SCENARIOS.forEach(s => { const x = S.scen[s.id] || {}; list.append(h('button', { class: 'row', onclick: () => go('sprechen-play', s.id) }, h('span', { class: 'row-emoji' }, s.emoji), h('span', { class: 'row-body' }, h('span', { class: 'row-t' }, s.title), h('span', { class: 'row-s' }, s.cat === 'arbeit' ? 'На работе' : 'В быту')), h('span', { class: 'badges' }, x.spoken ? h('span', { class: 'badge ok' }, '🗣 ' + x.spoken + '%') : null))); });
+  root.append(list);
+};
+
+VIEWS['sprechen-play'] = (root, id) => {
+  const set = id === 'basis' ? BASIS : SCENARIOS.find(s => s.id === id); if (!set) return VIEWS.sprechen(root);
+  root.append(h('div', { class: 'topbar' }, h('button', { class: 'link', onclick: () => go('sprechen') }, '← Ситуации'), rateCtl()), h('h1', null, (set.emoji || '🛟') + ' ' + set.title));
+  const tabs = h('div', { class: 'chips' }); const body = h('div');
+  const modes = [['shadow', 'Тень: повторяй']]; if (set.lines) modes.push(['role', 'Ролевая игра']);
+  let mode = 'shadow';
+  modes.forEach(([m, l]) => tabs.append(h('button', { class: 'chip' + (m === mode ? ' on' : ''), onclick: ev => { mode = m; tabs.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === ev.target)); draw(); } }, l)));
+  root.append(tabs, body);
+  setTimeout(draw, 0);
+  function draw() { stopSpeak(); stopListen(); body.innerHTML = ''; const mh = micHint(); if (mh) body.append(mh); if (mode === 'shadow') shadow(); else roleplay(); }
+
+  function shadow() {
+    let i = 0; const items = set.phrases;
+    const prog = h('div', { class: 'prog' }); const card = h('section', { class: 'card speak-card' }); body.append(prog, card);
+    function show() {
+      const p = items[i]; prog.textContent = (i + 1) + ' / ' + items.length;
+      card.innerHTML = '';
+      const de = h('p', { class: 'de xl', id: 'de-' + i }, p.de); const ru = h('p', { class: 'ru' }, p.ru);
+      const res = h('div', { class: 'cmp' });
+      const play = h('button', { class: 'btn', onclick: () => speak(p.de) }, '🔊 Слушать');
+      const slow = h('button', { class: 'btn', onclick: () => speak(p.de, Math.max(0.5, S.rate - 0.2)) }, '🐢');
+      const mic = micButton(p.de, res, () => {});
+      card.append(de, ru, h('div', { class: 'ctl' }, play, slow, mic.btn), mic.status, res, selfRate(res, () => nextItem()), h('div', { class: 'ctl' }, h('button', { class: 'link', onclick: () => { i = (i - 1 + items.length) % items.length; show(); } }, '← Назад'), h('button', { class: 'btn', onclick: nextItem }, 'Дальше →')));
+      speak(p.de);
+    }
+    function nextItem() { i++; if (i >= items.length) { i = 0; logAct(2); const x = S.scen[set.id] = S.scen[set.id] || {}; x.shadow = true; save(); card.innerHTML = ''; card.append(h('p', { class: 'big' }, 'Круг пройден!'), h('div', { class: 'ctl' }, h('button', { class: 'btn primary', onclick: show }, 'Ещё круг'), set.lines ? h('button', { class: 'btn', onclick: () => { mode = 'role'; tabs.querySelectorAll('.chip')[1].classList.add('on'); tabs.querySelectorAll('.chip')[0].classList.remove('on'); draw(); } }, 'Ролевая игра →') : null)); return; } show(); }
+    show();
+  }
+
+  function roleplay() {
+    const lines = set.lines; let i = 0; const scores = [];
+    body.append(h('p', { class: 'hint' }, 'Реплики собеседника (A) звучат сами. Твои (B) — скажи вслух по русской подсказке. Подсмотреть немецкий можно, но попробуй сначала сам.'));
+    const stage = h('div', { class: 'dialog' }); const card = h('section', { class: 'card speak-card' }); body.append(stage, card);
+    async function step() {
+      card.innerHTML = '';
+      if (i >= lines.length) { const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0; const x = S.scen[set.id] = S.scen[set.id] || {}; x.spoken = Math.max(x.spoken || 0, avg || 50); logAct(3); save(); card.append(h('p', { class: 'big' }, 'Диалог сыгран! ' + (scores.length ? 'Средняя точность: ' + avg + '%' : '')), h('div', { class: 'ctl' }, h('button', { class: 'btn primary', onclick: () => { i = 0; scores.length = 0; stage.innerHTML = ''; step(); } }, 'Ещё раз'), h('button', { class: 'btn', onclick: () => go('talk', set.id) }, 'Свободный разговор на эту тему →'))); return; }
+      const ln = lines[i];
+      if (ln.s === 'A') {
+        const el = h('div', { class: 'line other speaking' }, h('div', { class: 'who' }, 'A'), h('div', { class: 'bubble' }, h('div', { class: 'de' }, ln.de), h('div', { class: 'ru' }, ln.ru)));
+        stage.append(el); el.scrollIntoView({ block: 'center' }); await speak(ln.de); el.classList.remove('speaking'); i++; step(); return;
+      }
+      const res = h('div', { class: 'cmp' }); const deHint = h('p', { class: 'de xl', hidden: true }, ln.de);
+      const peek = h('button', { class: 'link', onclick: () => { deHint.hidden = false; peek.hidden = true; } }, 'Подсмотреть по-немецки');
+      const mic = micButton(ln.de, res, sc => scores.push(sc));
+      card.append(h('p', { class: 'eyebrow' }, 'Твоя реплика'), h('p', { class: 'ru xl' }, ln.ru), deHint, h('div', { class: 'ctl' }, mic.btn, peek, h('button', { class: 'btn', onclick: () => { deHint.hidden = false; speak(ln.de); } }, '🔊 Образец')), mic.status, res,
+        selfRate(res, () => { deHint.hidden = false; commit(); }),
+        h('div', { class: 'ctl' }, h('button', { class: 'btn primary', onclick: commit }, 'Дальше →')));
+      function commit() { const el = h('div', { class: 'line me' }, h('div', { class: 'who' }, 'B'), h('div', { class: 'bubble' }, h('div', { class: 'de' }, ln.de), h('div', { class: 'ru' }, ln.ru))); stage.append(el); i++; step(); }
+    }
+    step();
+  }
+};
+
+function micButton(expected, resEl, onScore) {
+  const status = h('p', { class: 'hint mic-status' });
+  const btn = h('button', { class: 'btn mic' }, '🎙 Говори');
+  let busy = false;
+  btn.addEventListener('click', async () => {
+    if (busy) { stopListen(); return; }
+    if (micState === 'none' || micState === 'blocked') { status.textContent = 'Микрофон недоступен — скажи вслух и оцени себя ниже.'; return; }
+    busy = true; btn.classList.add('rec'); btn.textContent = '● Слушаю… (нажми, чтобы закончить)'; status.textContent = 'Говори сейчас.'; resEl.innerHTML = '';
+    try {
+      const said = await listen(t => { status.textContent = '„' + t + '“'; });
+      if (!said) { status.textContent = 'Ничего не услышал. Попробуй ещё раз, ближе к микрофону.'; }
+      else { const r = compare(expected, said); status.textContent = 'Ты сказал: „' + said + '“'; resEl.innerHTML = '<p class="big ' + (r.score >= 80 ? 'good' : r.score >= 50 ? 'mid' : 'bad') + '">' + r.score + '%' + (r.score >= 80 ? ' — отлично' : r.score >= 50 ? ' — понятно, но не всё' : ' — ещё раз, медленнее') + '</p><p class="de">' + r.html + '</p>'; onScore(r.score); logAct(1); }
+    } catch (e) {
+      if (micState === 'blocked') { status.textContent = ''; resEl.innerHTML = ''; const hint = micHint(); if (hint) resEl.append(hint); }
+      else status.textContent = 'Не получилось распознать (' + (e.message || 'ошибка') + '). Попробуй ещё раз.';
+    }
+    busy = false; btn.classList.remove('rec'); btn.textContent = '🎙 Говори';
+  });
+  return { btn, status };
+}
+function selfRate(resEl, onDone) {
+  const wrap = h('div', { class: 'selfrate' }, h('span', { class: 'rate-l' }, 'Как получилось?'));
+  [['😕 Не смог', 0], ['🙂 С трудом', 1], ['😎 Легко', 2]].forEach(([l, g]) => wrap.append(h('button', { class: 'chip', onclick: () => { logAct(1); onDone(g); } }, l)));
+  return wrap;
+}
+
+// ---------- Фразы (SRS) ----------
+VIEWS.phrasen = root => {
+  root.append(h('h1', null, 'Фразы'), h('p', { class: 'lead' }, 'Интервальное повторение: фраза возвращается ровно тогда, когда ты начинаешь её забывать.'));
+  const due = dueCards();
+  const info = h('div', { class: 'stats' }, stat(due.length, 'к повторению'), stat(knownCount(), 'в активе', CARDS.length), stat(Object.keys(S.cards).length, 'начато'));
+  root.append(info);
+  const area = h('div'); root.append(area);
+  if (!due.length) { area.append(h('section', { class: 'card' }, h('p', { class: 'big' }, 'На сегодня всё.'), h('p', null, 'Хочешь ещё — возьми 10 случайных фраз.'), h('button', { class: 'btn primary', onclick: () => session(shuffle(CARDS.slice()).slice(0, 10)) }, 'Случайные 10'))); return; }
+  session(shuffle(due).slice(0, 15));
+  function session(queue) {
+    let i = 0; let dir = Math.random() < 0.5 ? 'ru' : 'de';
+    const mh = micHint(); area.innerHTML = ''; if (mh) area.append(mh);
+    const prog = h('div', { class: 'prog' }); const card = h('section', { class: 'card speak-card' }); area.append(prog, card);
+    function show() {
+      if (i >= queue.length) { card.innerHTML = ''; card.append(h('p', { class: 'big' }, 'Серия закончена.'), h('div', { class: 'ctl' }, h('button', { class: 'btn primary', onclick: () => { const d = dueCards(); if (d.length) session(shuffle(d).slice(0, 15)); else go('phrasen'); } }, 'Ещё серия'), h('button', { class: 'btn', onclick: () => go('home') }, 'На главную'))); return; }
+      const c = queue[i]; dir = Math.random() < 0.6 ? 'ru' : 'de'; prog.textContent = (i + 1) + ' / ' + queue.length + ' · ' + c.setTitle;
+      card.innerHTML = '';
+      const res = h('div', { class: 'cmp' });
+      if (dir === 'ru') {
+        const de = h('p', { class: 'de xl', hidden: true }, c.de);
+        const reveal = h('button', { class: 'btn', onclick: () => { de.hidden = false; speak(c.de); reveal.hidden = true; } }, 'Показать ответ');
+        const mic = micButton(c.de, res, sc => { de.hidden = false; });
+        card.append(h('p', { class: 'eyebrow' }, 'Скажи по-немецки'), h('p', { class: 'ru xl' }, c.ru), de, h('div', { class: 'ctl' }, mic.btn, reveal, h('button', { class: 'icon-btn', onclick: () => { de.hidden = false; speak(c.de); } }, '🔊')), mic.status, res);
+      } else {
+        const ru = h('p', { class: 'ru xl', hidden: true }, c.ru); const de = h('p', { class: 'de xl', hidden: true }, c.de);
+        const reveal = h('button', { class: 'btn', onclick: () => { ru.hidden = false; de.hidden = false; reveal.hidden = true; } }, 'Показать перевод');
+        card.append(h('p', { class: 'eyebrow' }, 'Что это значит? (на слух)'), de, ru, h('div', { class: 'ctl' }, speakBtn(c.de, 'big'), h('button', { class: 'btn', onclick: () => speak(c.de, Math.max(0.5, S.rate - 0.2)) }, '🐢'), reveal));
+        setTimeout(() => speak(c.de), 200);
+      }
+      const grades = h('div', { class: 'grades' });
+      [['Не знал', 0, 'g0'], ['С трудом', 1, 'g1'], ['Легко', 2, 'g2']].forEach(([l, g, cls]) => grades.append(h('button', { class: 'btn ' + cls, onclick: () => { rateCard(c.id, g); i++; show(); } }, l)));
+      card.append(h('p', { class: 'hint' }, 'Оцени честно — так программа подберёт интервал.'), grades);
+    }
+    show();
+  }
+};
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+// ---------- Разговор с ИИ ----------
+VIEWS.talk = (root, preset) => {
+  root.append(h('h1', null, 'Разговор'), h('p', { class: 'lead' }, 'Собеседник говорит медленно и просто, переспрашивает и мягко поправляет. Говори или пиши — как удобнее.'));
+  const setup = h('div'); root.append(setup);
+  (async () => {
+    const s = await getSample();
+    if (!s && !S.apiKey) {
+      setup.append(h('section', { class: 'card warn' }, h('h3', null, 'Собеседник пока не подключён'),
+        h('p', null, 'Если ты открыл приложение по ссылке на claude.ai — разреши ему «спрашивать Claude» при первом запросе. Если открыл как файл — вставь свой API-ключ Anthropic в настройках (⚙), и собеседник заработает.'),
+        h('button', { class: 'btn', onclick: () => go('settings') }, 'Открыть настройки')));
+      if (!s) { /* всё равно даём выбрать тему: первый вызов попросит разрешение */ }
+    }
+    const list = h('div', { class: 'topics' });
+    TALK_TOPICS.forEach(t => list.append(h('button', { class: 'topic' + (preset === t.id ? ' on' : ''), onclick: () => startTalk(t) }, h('span', { class: 'row-t' }, t.title), h('span', { class: 'row-s' }, t.hint))));
+    setup.append(h('h2', { class: 'cat' }, 'Выбери ситуацию'), list);
+    if (preset) { const t = TALK_TOPICS.find(x => x.id === preset); if (t) startTalk(t); }
+  })();
+
+  function startTalk(topic) {
+    stopSpeak(); root.innerHTML = '';
+    const history = []; let busy = false;
+    root.append(h('div', { class: 'topbar' }, h('button', { class: 'link', onclick: () => go('talk') }, '← Темы'), rateCtl()), h('h1', null, topic.title), h('p', { class: 'hint' }, topic.hint + ' Напиши «Hilfe» или по-русски, если не знаешь, как сказать.'));
+    const chat = h('div', { class: 'chat' }); const status = h('p', { class: 'hint mic-status' });
+    const inp = h('input', { class: 'input', id: 'talk-inp', placeholder: 'Напиши по-немецки…', autocomplete: 'off' });
+    const send = h('button', { class: 'btn primary', onclick: () => submit(inp.value) }, 'Отправить');
+    const mic = h('button', { class: 'btn mic' }, '🎙 Говори');
+    const mh = micHint();
+    root.append(chat, status, h('div', { class: 'ctl talk-ctl' }, mic, inp, send), mh || '');
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(inp.value); });
+    mic.addEventListener('click', async () => {
+      if (micState === 'none' || micState === 'blocked') { status.textContent = 'Микрофон недоступен — пиши текстом.'; return; }
+      mic.classList.add('rec'); mic.textContent = '● Слушаю…'; status.textContent = 'Говори.';
+      try { const t = await listen(x => { inp.value = x; }); if (t) { inp.value = t; submit(t); } else status.textContent = 'Ничего не услышал.'; }
+      catch (e) { status.textContent = micState === 'blocked' ? 'Микрофон здесь недоступен — пиши текстом или открой файл в Chrome.' : 'Не получилось распознать.'; }
+      mic.classList.remove('rec'); mic.textContent = '🎙 Говори';
+    });
+    function bubble(role, j) {
+      if (role === 'user') { chat.append(h('div', { class: 'msg user' }, h('div', { class: 'de' }, j))); }
+      else {
+        const b = h('div', { class: 'msg bot' }, h('div', { class: 'de' }, j.reply), speakBtn(j.reply));
+        if (j.reply_ru) { const ru = h('div', { class: 'ru', hidden: true }, j.reply_ru); b.append(h('button', { class: 'link small', onclick: ev => { ru.hidden = !ru.hidden; ev.target.textContent = ru.hidden ? 'Перевод' : 'Скрыть'; } }, 'Перевод'), ru); }
+        chat.append(b);
+      }
+      chat.scrollTop = chat.scrollHeight; window.scrollTo(0, document.body.scrollHeight);
+    }
+    async function turn(userText) {
+      busy = true; send.disabled = true; status.textContent = 'Собеседник думает…';
+      try {
+        const j = await askTutor(topic, history);
+        if (userText != null && (j.fix || j.tip_ru)) { const fixEl = h('div', { class: 'fix' }, j.fix ? h('div', null, h('span', { class: 'fix-l' }, 'Лучше так: '), h('span', { class: 'de' }, j.fix), speakBtn(j.fix)) : null, j.tip_ru ? h('div', { class: 'ru' }, j.tip_ru) : null); chat.append(fixEl); }
+        history.push({ role: 'assistant', json: j }); bubble('bot', j); status.textContent = '';
+        S.talkTurns++; logAct(1); save();
+        await speak(j.reply);
+      } catch (e) {
+        status.textContent = e.message === 'no-tutor' ? 'Собеседник не подключён (см. настройки ⚙).' : (/not_granted/.test(e.code || e.message || '') ? 'Нужно разрешить приложению обращаться к Claude.' : 'Ошибка связи: ' + (e.message || e.code || '') + '. Попробуй ещё раз.');
+      }
+      busy = false; send.disabled = false; inp.focus();
+    }
+    function submit(text) { text = (text || '').trim(); if (!text || busy) return; inp.value = ''; history.push({ role: 'user', text }); bubble('user', text); turn(text); }
+    turn(null);
+  }
+};
+
+// ---------- Прогресс ----------
+VIEWS.fortschritt = root => {
+  root.append(h('h1', null, 'Прогресс'), h('p', { class: 'lead' }, 'Считаем не баллы, а ситуации, в которых ты уже можешь объясниться.'));
+  root.append(h('div', { class: 'stats' }, stat(streak(), 'дней подряд'), stat(knownCount(), 'фраз в активе', CARDS.length), stat(masteredScen(), 'ситуаций', SCENARIOS.length), stat(S.talkTurns, 'реплик в разговоре')));
+  // последние 14 дней
+  const days = h('div', { class: 'days' }); const d = new Date(); d.setDate(d.getDate() - 13);
+  for (let i = 0; i < 14; i++) { const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); const a = (S.days[k] || {}).acts || 0; days.append(h('div', { class: 'day' + (a ? ' on' : '') + (a >= 8 ? ' hot' : ''), title: k + ': ' + a }, h('span', { class: 'day-d' }, String(d.getDate())), h('span', { class: 'day-bar', style: 'height:' + Math.min(100, a * 8) + '%' }))); d.setDate(d.getDate() + 1); }
+  root.append(h('h2', { class: 'cat' }, 'Последние 14 дней'), days);
+  root.append(h('h2', { class: 'cat' }, 'Ситуации'));
+  const tbl = h('div', { class: 'list' });
+  SCENARIOS.forEach(s => { const x = S.scen[s.id] || {}; tbl.append(h('div', { class: 'row static' }, h('span', { class: 'row-emoji' }, s.emoji), h('span', { class: 'row-body' }, h('span', { class: 'row-t' }, s.title)), h('span', { class: 'badges' }, h('span', { class: 'badge' + (x.heard ? ' ok' : '') }, '🎧 слушал'), h('span', { class: 'badge' + (x.quiz >= 2 ? ' ok' : '') }, '✓ понял' + (x.quiz != null ? ' ' + x.quiz + '/3' : '')), h('span', { class: 'badge' + (x.spoken ? ' ok' : '') }, '🗣 говорил' + (x.spoken ? ' ' + x.spoken + '%' : ''))))); });
+  root.append(tbl);
+  root.append(h('section', { class: 'card' }, h('h3', null, 'Ступени'), h('p', null, 'Ситуация считается «закрытой», когда ты её послушал, понял минимум 2 из 3 вопросов и сыграл роль. Фраза «в активе» — когда ты вспомнил её три раза с растущими интервалами. Это ближе к реальному умению, чем очки.')));
+};
+
+// ---------- Настройки ----------
+VIEWS.settings = root => {
+  root.append(h('h1', null, 'Настройки'));
+  const name = h('input', { class: 'input', id: 'set-name', value: S.name, placeholder: 'Как к тебе обращаться (например, Alexander)' });
+  name.addEventListener('change', () => { S.name = name.value.trim(); save(); });
+  const sel = h('select', { class: 'input', id: 'set-voice' }); fillVoiceSelect(sel);
+  sel.addEventListener('change', () => { S.voiceName = sel.value; save(); speak('Guten Tag! Ich bin deine Stimme.'); });
+  const first = h('label', { class: 'check' }, h('input', { type: 'checkbox', id: 'set-text' }), ' Показывать текст диалога сразу (не рекомендуется)');
+  first.querySelector('input').checked = S.showTextFirst; first.querySelector('input').addEventListener('change', e => { S.showTextFirst = e.target.checked; save(); });
+  const key = h('input', { class: 'input', id: 'set-key', type: 'password', value: S.apiKey, placeholder: 'sk-ant-…' });
+  key.addEventListener('change', () => { S.apiKey = key.value.trim(); save(); });
+  root.append(
+    h('section', { class: 'card' }, h('h3', null, 'Имя'), name),
+    h('section', { class: 'card' }, h('h3', null, 'Голос диктора'), h('p', { class: 'hint' }, voices.length ? 'Доступные немецкие голоса этого устройства. В Chrome лучше всего «Google Deutsch».' : 'Немецкие голоса не найдены. В Android: Настройки → Язык → Синтез речи → установить немецкий. В Windows: Параметры → Время и язык → Речь → добавить Deutsch.'), sel, h('div', { class: 'ctl' }, rateCtl(), h('button', { class: 'btn', onclick: () => speak('Guten Tag! Heute bist du im Wareneingang.') }, '🔊 Проба'))),
+    h('section', { class: 'card' }, h('h3', null, 'Диалоги'), first),
+    h('section', { class: 'card' }, h('h3', null, 'ИИ-собеседник'), h('p', { class: 'hint' }, 'По ссылке claude.ai собеседник работает без ключа — просто разреши доступ при первом запросе. Если приложение открыто как файл в Chrome, нужен API-ключ Anthropic (console.anthropic.com). Ключ хранится только в этом браузере.'), key),
+    h('section', { class: 'card' }, h('h3', null, 'Микрофон'), h('p', { class: 'hint' }, micState === 'none' ? 'Этот браузер не поддерживает распознавание речи. Используй Chrome на Android или на компьютере.' : micState === 'blocked' ? 'Распознавание заблокировано в этом окне. Сохрани файл и открой его в Chrome напрямую.' : 'Распознавание речи доступно. При первом нажатии «Говори» браузер спросит разрешение на микрофон.'), h('button', { class: 'btn', onclick: async ev => { ev.target.textContent = 'Скажи что-нибудь по-немецки…'; try { const t = await listen(); ev.target.textContent = t ? 'Услышал: „' + t + '“' : 'Ничего не услышал'; } catch (e) { ev.target.textContent = micState === 'blocked' ? 'Заблокировано в этом окне' : 'Ошибка: ' + e.message; } } }, '🎙 Проверить микрофон')),
+    h('section', { class: 'card' }, h('h3', null, 'Данные'), h('p', { class: 'hint' }, 'Прогресс хранится только в этом браузере на этом устройстве.'), h('button', { class: 'btn danger', onclick: ev => { if (ev.target.dataset.sure) { localStorage.removeItem(STORE_KEY); S = loadState(); go('home'); } else { ev.target.dataset.sure = '1'; ev.target.textContent = 'Точно сбросить? Нажми ещё раз'; } } }, 'Сбросить прогресс')),
+  );
+};
+function fillVoiceSelect(sel) {
+  sel = sel || document.getElementById('set-voice'); if (!sel) return; sel.innerHTML = '';
+  sel.append(h('option', { value: '' }, 'Автоматически'));
+  voices.forEach(v => sel.append(h('option', { value: v.name }, v.name + ' (' + v.lang + ')')));
+  sel.value = S.voiceName || '';
+}
+
+// ===================== Старт =====================
+render();
+
+</script>
+
+</body></html>
